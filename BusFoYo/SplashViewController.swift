@@ -23,6 +23,9 @@ class SplashViewController: UIViewController {
         view.backgroundColor = .white
         setupAnimationUI()
         playAnimation()
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(skipAnimation))
+        view.addGestureRecognizer(tap)
     }
 
     func setupAnimationUI() {
@@ -42,14 +45,23 @@ class SplashViewController: UIViewController {
     }
 
     func goToNextScreen() {
-        if let user = UserManager.shared.currentUser {
-            // Пользователь уже есть → переходим на экран ввода PIN-кода
-            let pinVC = PinCodeViewController()
-            self.navigationController?.setViewControllers([pinVC], animated: true)
+        let nextVC: UIViewController
+        if let _ = UserManager.shared.currentUser {
+            nextVC = PinCodeViewController()
         } else {
-            // Пользователя нет → переходим на экран ввода логина и названия компании
-            let authVC = AuthViewController()
-            self.navigationController?.setViewControllers([authVC], animated: true)
+            nextVC = AuthViewController()
         }
+
+        guard let window = view.window else { return }
+        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
+            window.rootViewController = UINavigationController(rootViewController: nextVC)
+        }, completion: nil)
     }
+    
+    @objc func skipAnimation() {
+        animationView.stop()
+        goToNextScreen()
+    
+    }
+    
 }

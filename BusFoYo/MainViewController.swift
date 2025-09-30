@@ -30,6 +30,15 @@ class MainViewController: UIViewController {
         view.backgroundColor = .white
         title = "Main"
         setupUI()
+        
+        profileButton.addTarget(self, action: #selector(profileTapped), for: .touchUpInside)
+        ordersButton.addTarget(self, action: #selector(ordersTapped), for: .touchUpInside)
+        clientsButton.addTarget(self, action: #selector( clientsTapped), for: .touchUpInside)
+        calculationsButton.addTarget(self, action: #selector(calculationsTapped), for: .touchUpInside)
+        
+        
+        
+        
     }
     
     func createButton(title:String) -> UIButton {
@@ -43,9 +52,9 @@ class MainViewController: UIViewController {
         btn.clipsToBounds = true
         btn.contentHorizontalAlignment = .left
         
-        var config = UIButton.Configuration.filled() // или .plain(), .tinted()
+        var config = UIButton.Configuration.filled()
         config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
-        config.titleAlignment = .leading // текст слева
+        config.titleAlignment = .leading
         btn.configuration = config
         
         return btn
@@ -78,6 +87,27 @@ class MainViewController: UIViewController {
             
             
         ])
+    }
+    
+    
+    @objc func profileTapped() {
+        let vs = ProfileViewController()
+        navigationController?.pushViewController(vs, animated: true)
+    }
+    
+    @objc func ordersTapped() {
+        let vs =  OrdersViewController()
+        navigationController?.pushViewController(vs, animated: true)
+    }
+    
+    @objc func clientsTapped() {
+        let vs = ClientsViewController()
+        navigationController?.pushViewController(vs, animated: true)
+    }
+    
+    @objc func calculationsTapped() {
+        let vs = CalculationsViewController()
+        navigationController?.pushViewController(vs, animated: true)
     }
     
 }

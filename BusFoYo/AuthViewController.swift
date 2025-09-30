@@ -16,6 +16,7 @@ class AuthViewController: UIViewController {
         tf.borderStyle = .roundedRect
         tf.autocapitalizationType = .none
         tf.returnKeyType = .next
+        
         return tf
     }()
 
@@ -36,6 +37,14 @@ class AuthViewController: UIViewController {
         tf.borderStyle = .roundedRect
         tf.isSecureTextEntry = true
         tf.keyboardType = .numberPad
+        
+        let infoButton = UIButton(type: .custom)
+        infoButton.setImage(UIImage(systemName: "info.circle"), for: .normal)
+        infoButton.addTarget(self, action: #selector(showHint), for: .touchUpInside)
+        infoButton.frame = CGRect(x:0, y:0, width: 8, height: 8)
+        
+        tf.rightView = infoButton
+        tf.rightViewMode = .always
         tf.returnKeyType = .done
         return tf
     }()
@@ -53,6 +62,10 @@ class AuthViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupUI()
+        
+        pinTextField.keyboardType = .numberPad
+        pinTextField.addTarget(self, action: #selector(limitPin), for: .editingChanged)
+        
     }
 
     func setupUI() {
@@ -89,7 +102,7 @@ class AuthViewController: UIViewController {
               !username.isEmpty,
               let company = companyTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !company.isEmpty else {
-            let alert = UIAlertController(title: "Error", message: "Please enter both username and company name", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Wrong", message: "Please fill all the fields 🚩", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "OK", style: .default))
             present(alert, animated: true)
             return
@@ -98,8 +111,8 @@ class AuthViewController: UIViewController {
         if UserManager.shared.currentUser == nil {
             guard let pin = pinTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !pin.isEmpty else {
-                let alert = UIAlertController(title: "Error", message: "Please enter a PIN", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                let alert = UIAlertController(title: "Wrong", message: "Please enter a PIN 🚩", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Ok", style: .default))
                 present(alert, animated: true)
                 return
             }
@@ -111,4 +124,20 @@ class AuthViewController: UIViewController {
         navigationController?.setViewControllers([mainVC], animated: true)
     }
     
+    @objc func showHint() {
+        let alert = UIAlertController(title: "Notice", message: "PIN must contain 4 numbers 🙋‍♂️", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default))
+        present(alert, animated: true)
+        
+    }   
+    
+    @objc func limitPin() {
+        guard let text = pinTextField.text else { return }
+
+        pinTextField.text = text.filter { "0123456789".contains($0) }
+
+        if pinTextField.text!.count > 4 {
+            pinTextField.text = String(pinTextField.text!.prefix(4))
+        }
+    }
 }
