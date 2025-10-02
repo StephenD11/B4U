@@ -96,7 +96,7 @@ class PinCodeViewController: UIViewController {
 
     func showAlert(message: String) {
         let alert = UIAlertController(title: "Wrong 🚫", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Try again", style: .default))
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
     
@@ -108,12 +108,12 @@ class PinCodeViewController: UIViewController {
             textField.autocapitalizationType = .none
         }
         
-        alert.addAction(UIAlertAction(title: "Back", style: .cancel))
+        alert.addAction(UIAlertAction(title: "Cancle", style: .cancel))
         
         alert.addAction(UIAlertAction(title: "Enter", style: .default, handler: { [weak self] _ in
             guard let username = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !username.isEmpty else {
-                self?.showAlert(message: "Please enter a username")
+                self?.showAlert(message: "The field can't be empty")
                 return
             }
             

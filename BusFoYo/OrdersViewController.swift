@@ -2,7 +2,7 @@
 //  OrdersViewController.swift
 //  BusFoYo
 //
-//  Created by Stepan on 29.09.2025.
+//  Created by Stephan on 29.09.2025.
 //
 
 
@@ -15,8 +15,19 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
     
     var sortedMonths: [String] = []
     var activeMonths: [String] {
-        return sortedMonths.filter { (ordersByMonth[$0]?.count ?? 0) > 0 }
+        return ordersByMonth
+            .filter { !$0.value.isEmpty }
+            .keys
+            .sorted { key1, key2 in
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "LLLL yyyy"
+                let date1 = dateFormatter.date(from: key1) ?? Date.distantPast
+                let date2 = dateFormatter.date(from: key2) ?? Date.distantPast
+                return date1 > date2
+            }
     }
+    
+    
     
     let searchBar: UISearchBar = {
         let sb = UISearchBar()
@@ -54,14 +65,16 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
         view.backgroundColor = .white
         title = "Orders"
-        
+
+        loadOrders()
         setupUI()
-        setupDummyData()
-        
+        setupDummyDataIfNeeded()
+        updateTableBackground()
+
         searchBar.delegate = self
-        
     }
     
     
@@ -84,48 +97,97 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
 
     }
     
-    func setupDummyData() {
-        let months = Calendar.current.monthSymbols
-        sortedMonths = months
-        for month in months {
-            ordersByMonth[month] = []
+    
+    func setupDummyDataIfNeeded() {
+        if allOrdersByMonth.isEmpty {
+            ordersByMonth = [:]
+            allOrdersByMonth = [:]
+            saveOrders()
+        } else {
+            ordersByMonth = allOrdersByMonth
         }
-
-        let order = Order(
-            id: UUID(),
-            clientName: "Rock H.H",
-            orderDate: Date(),
-            deadline: Date().addingTimeInterval(86400),
-            isPaid: true,
-            description: "Testing order"
-        )
-
-        let monthIndex = Calendar.current.component(.month, from: order.orderDate) - 1
-        let monthName = sortedMonths[monthIndex]
-        ordersByMonth[monthName]?.append(order)
-        
-        allOrdersByMonth = ordersByMonth
-
     }
     
-    
     func addOrder(_ order: Order) {
-        let monthIndex = Calendar.current.component(.month, from: order.orderDate) - 1
-        let monthName = sortedMonths[monthIndex]
+        let newMonth = order.monthName
+
+        for (month, orders) in ordersByMonth {
+                if let index = orders.firstIndex(where: { $0.id == order.id }) {
+                    var monthOrders = orders
+                    monthOrders.remove(at: index)
+                    ordersByMonth[month] = monthOrders
+                }
+            }
+            
+            if var monthOrders = ordersByMonth[newMonth] {
+                monthOrders.append(order)
+                ordersByMonth[newMonth] = monthOrders
+            } else {
+                ordersByMonth[newMonth] = [order]
+            }
         
-        ordersByMonth[monthName]?.append(order)
+        allOrdersByMonth = ordersByMonth
         tabView.reloadData()
+        updateTableBackground()
+        saveOrders()
+
     }
     
     @objc func addNewOrderTapped() {
         let newOrderVC = NewOrderViewController()
-        newOrderVC.delegate = self  
+        newOrderVC.delegate = self
+
+        let orderNumber = allOrdersByMonth.values.flatMap { $0 }.count + 1
+        newOrderVC.orderNumber = orderNumber
+
         navigationController?.pushViewController(newOrderVC, animated: true)
     }
     
+    func saveOrders() {
+        if let data = try? JSONEncoder().encode(allOrdersByMonth) {
+            UserDefaults.standard.set(data, forKey: "allOrders")
+        }
+    }
+
+    func loadOrders() {
+        if let data = UserDefaults.standard.data(forKey: "allOrders"),
+           let savedOrders = try? JSONDecoder().decode([String: [Order]].self, from: data) {
+            ordersByMonth = savedOrders
+            allOrdersByMonth = savedOrders
+            sortedMonths = Calendar.current.monthSymbols
+        }
+    }
+    
+    func deleteOrder(at index: Int, month: String) {
+        guard var monthOrders = ordersByMonth[month] else { return }
+
+        monthOrders.remove(at: index)
+        ordersByMonth[month] = monthOrders
+        allOrdersByMonth[month] = monthOrders
+
+        tabView.reloadData()
+        updateTableBackground()
+        saveOrders()
+    }
 }
 
 extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let month = activeMonths[indexPath.section]
+
+        guard let orders = ordersByMonth[month], indexPath.row < orders.count else { return }
+
+        let order = orders[indexPath.row]
+
+        let detailVC = OrderDetailViewController(order: order)
+        detailVC.delegate = self
+        detailVC.monthName = month
+        detailVC.indexInMonth = indexPath.row
+        detailVC.orderNumber = globalOrderNumber(for: indexPath)
+
+        navigationController?.pushViewController(detailVC, animated: true)
+    }
     
     func numberOfSections(in tableView: UITableView) -> Int {
         return activeMonths.count
@@ -146,34 +208,34 @@ extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
         
         let month = activeMonths[indexPath.section]
         
-        if let order = ordersByMonth[month]?[indexPath.row] {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "dd"
-            let dateString = formatter.string(from: order.orderDate)
-            
-            let paidStatus = order.isPaid ? "✅" : "❌"
-            let clientText = order.clientName
-            let orderNumberText = "ORDER: \(globalOrderNumber(for: indexPath))"
-
-    
-            let fullText = "\(orderNumberText) \nClient: \(clientText) • Data: \(dateString) • Paid: \(paidStatus)"
-            let attributedText = NSMutableAttributedString(string: fullText)
-            
-            
-            let orderRange = (fullText as NSString).range(of: orderNumberText)
-            attributedText.addAttributes([.font: UIFont.boldSystemFont(ofSize: 15)], range: orderRange)
-
-            let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.lineSpacing = 6
-            attributedText.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSMakeRange(0, fullText.count))
-
-            cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.attributedText = attributedText        }
+        guard let orders = ordersByMonth[month], indexPath.row < orders.count else {
+            cell.textLabel?.text = ""
+            return cell
+        }
+        
+        let order = orders[indexPath.row]
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd.MM.yyyy"
+        let dateString = formatter.string(from: order.orderDate)
+        
+        let clientText = order.clientName
+        let fullText = "📍 Client: \(clientText) • Date: \(dateString)"
+        let attributedText = NSMutableAttributedString(string: fullText)
+        
+        let orderRange = (fullText as NSString).range(of: clientText)
+        attributedText.addAttributes([.font: UIFont.boldSystemFont(ofSize: 15)], range: orderRange)
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 6
+        attributedText.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSMakeRange(0, fullText.count))
+        
+        cell.textLabel?.numberOfLines = 0
+        cell.textLabel?.attributedText = attributedText
         
         return cell
     }
     
-    //Count all orders
     func globalOrderNumber(for indexPath: IndexPath) -> Int {
         var number = 0
         for i in 0..<indexPath.section {
@@ -182,6 +244,22 @@ extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
         }
         number += indexPath.row + 1
         return number
+    }
+    
+    func updateTableBackground() {
+        let hasOrders = ordersByMonth.values.flatMap { $0 }.count > 0
+        
+        if hasOrders {
+            tabView.backgroundView = nil
+        } else {
+            let label = UILabel()
+            label.text = "No orders yet. Please add new one"
+            label.textColor = .gray
+            label.textAlignment = .center
+            label.numberOfLines = 0
+            label.font = UIFont.systemFont(ofSize: 16)
+            tabView.backgroundView = label
+        }
     }
 
     
@@ -199,8 +277,10 @@ extension OrdersViewController: UISearchBarDelegate {
             }
             ordersByMonth = filtered
         }
+        
         tabView.reloadData()
     }
+    
     
 }
 

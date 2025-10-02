@@ -1,45 +1,46 @@
 //
-//  NewOrderViewController.swift
+//  OrderDetailViewController..swift
 //  BusFoYo
 //
-//  Created by Stepan on 30.09.2025.
+//  Created by Stepan on 01.10.2025.
 //
 
 import UIKit
 
-protocol NewOrderDelegate: AnyObject {
-    func addOrder(_ order: Order)
-    func deleteOrder(at index: Int, month: String)  
-}
-
-class NewOrderViewController: UIViewController {
-    
-
+class OrderDetailViewController: UIViewController {
     
     weak var delegate: NewOrderDelegate?
+    var order: Order
+    var monthName: String!
+    var indexInMonth: Int!
     var orderNumber: Int?
-    
-    
 
+    
+    init(order: Order) {
+        self.order = order
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     lazy var usernameField: UITextField = {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Username"
         tf.borderStyle = .roundedRect
         return tf
     }()
-
-    lazy var amountField: UITextField = {
+    
+    lazy var amountFiled: UITextField = {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Age"
         tf.borderStyle = .roundedRect
         tf.placeholder = "00.00"
         tf.keyboardType = .numberPad
         return tf
     }()
-
+    
     lazy var orderDatePicker: UIDatePicker = {
         let dp = UIDatePicker()
         dp.translatesAutoresizingMaskIntoConstraints = false
@@ -67,13 +68,14 @@ class NewOrderViewController: UIViewController {
         lbl.text = "Deadline:"
         return lbl
     }()
-
+    
     lazy var paidSwitch: UISwitch = {
         let sw = UISwitch()
         sw.translatesAutoresizingMaskIntoConstraints = false
         return sw
     }()
-
+    
+    
     lazy var paidLabel: UILabel = {
         let lbl = UILabel()
         lbl.translatesAutoresizingMaskIntoConstraints = false
@@ -81,13 +83,12 @@ class NewOrderViewController: UIViewController {
         return lbl
     }()
     
-
     
     lazy var descriptionTextView: UITextView = {
         let tv = UITextView()
         tv.translatesAutoresizingMaskIntoConstraints = false
-        tv.layer.borderColor = UIColor.lightGray.cgColor // рамка
-        tv.layer.borderWidth = 1.0
+        tv.layer.borderColor = UIColor.lightGray.cgColor
+        tv.layer.borderWidth = 1
         tv.layer.cornerRadius = 8
         tv.font = UIFont.systemFont(ofSize: 16)
         return tv
@@ -96,27 +97,39 @@ class NewOrderViewController: UIViewController {
     lazy var saveButton: UIButton = {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("Save order", for: .normal)
-        btn.titleLabel?.font = .systemFont(ofSize: 18)
+        btn.setTitle("Save changes", for: .normal)
         btn.setTitleColor(.systemBlue, for: .normal)
-        btn.layer.cornerRadius = 10
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         btn.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
         return btn
-        
+    }()
+    
+    lazy var deleteButton: UIButton = {
+        let btn = UIButton()
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.setTitle("Delete order", for: .normal)
+        btn.setTitleColor(.systemRed, for: .normal)
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
+        btn.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
+        return btn
     }()
     
     lazy var clientNameLabel: UILabel = makeLabel(withText: "Client name:")
-    lazy var totalPrice: UILabel = makeLabel(withText: "Total price:")
-    lazy var clientDescriptionLabel: UILabel = makeLabel(withText: "Description:")
+    lazy var orderTotalPriceLabel: UILabel = makeLabel(withText: "Total price:")
+    lazy var orderDescriptionLabel: UILabel = makeLabel(withText: "Description:")
     lazy var orderNumberLabel: UILabel = makeLabel(withText: "ORDER NUMBER \(orderNumber ?? 0)")
+
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
-        title = "New Order"
         
+        view.backgroundColor = .white
+        title = "ℹ️ \(order.clientName)"
         setupUI()
+        populateFields()
     }
+    
     
     func setupUI() {
         view.addSubview(orderNumberLabel)
@@ -124,8 +137,8 @@ class NewOrderViewController: UIViewController {
         view.addSubview(clientNameLabel)
         view.addSubview(usernameField)
         
-        view.addSubview(totalPrice)
-        view.addSubview(amountField)
+        view.addSubview(orderTotalPriceLabel)
+        view.addSubview(amountFiled)
         
         view.addSubview(orderDatePickerLabel)
         view.addSubview(orderDatePicker)
@@ -136,14 +149,13 @@ class NewOrderViewController: UIViewController {
         view.addSubview(paidLabel)
         view.addSubview(paidSwitch)
         
-        view.addSubview(clientDescriptionLabel)
+        view.addSubview(orderDescriptionLabel)
         view.addSubview(descriptionTextView)
         
         view.addSubview(saveButton)
+        view.addSubview(deleteButton)
         
         NSLayoutConstraint.activate([
-            
-            
             
             orderNumberLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 25),
             orderNumberLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
@@ -155,14 +167,14 @@ class NewOrderViewController: UIViewController {
             usernameField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             usernameField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             
-            totalPrice.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 15),
-            totalPrice.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
+            orderTotalPriceLabel.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 15),
+            orderTotalPriceLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
             
-            amountField.topAnchor.constraint(equalTo: totalPrice.bottomAnchor, constant: 5),
-            amountField.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
-            amountField.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
+            amountFiled.topAnchor.constraint(equalTo: orderTotalPriceLabel.bottomAnchor, constant: 5),
+            amountFiled.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
+            amountFiled.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
             
-            orderDatePickerLabel.topAnchor.constraint(equalTo: amountField.bottomAnchor, constant: 25),
+            orderDatePickerLabel.topAnchor.constraint(equalTo: amountFiled.bottomAnchor, constant: 25),
             orderDatePickerLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
             
             orderDatePicker.centerYAnchor.constraint(equalTo: orderDatePickerLabel.centerYAnchor),
@@ -180,10 +192,10 @@ class NewOrderViewController: UIViewController {
             paidSwitch.centerYAnchor.constraint(equalTo: paidLabel.centerYAnchor),
             paidSwitch.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
             
-            clientDescriptionLabel.topAnchor.constraint(equalTo: paidLabel.bottomAnchor, constant: 15),
-            clientDescriptionLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
+            orderDescriptionLabel.topAnchor.constraint(equalTo: paidLabel.bottomAnchor, constant: 15),
+            orderDescriptionLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
             
-            descriptionTextView.topAnchor.constraint(equalTo: clientDescriptionLabel.bottomAnchor, constant: 5),
+            descriptionTextView.topAnchor.constraint(equalTo: orderDescriptionLabel.bottomAnchor, constant: 5),
             descriptionTextView.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
             descriptionTextView.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
             descriptionTextView.heightAnchor.constraint(equalToConstant: 120),
@@ -194,7 +206,8 @@ class NewOrderViewController: UIViewController {
             saveButton.widthAnchor.constraint(equalToConstant: 200),
             saveButton.heightAnchor.constraint(equalToConstant: 50),
             
-            
+            deleteButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
+            deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
         ])
     }
     
@@ -207,35 +220,49 @@ class NewOrderViewController: UIViewController {
         return lbl
     }
     
+    func populateFields() {
+        usernameField.text = order.clientName
+        amountFiled.text = order.totalPrice
+        orderDatePicker.date = order.orderDate
+        deadlineDatePicker.date = order.deadline
+        paidSwitch.isOn = order.isPaid
+        descriptionTextView.text = order.description
+    }
+    
     @objc func saveTapped() {
-        guard let username  = usernameField.text, !username.isEmpty,
-              let amountText = amountField.text, let amount = Int(amountText),
-              !amountText.isEmpty else {
-            let alert = UIAlertController(title: "Error", message: "Fill all required fields", preferredStyle: .alert)
+        guard let username = usernameField.text, !username.isEmpty, let amountText = amountFiled.text, !amountText.isEmpty else {
+            let alert = UIAlertController(title: "Error", message: "Please fill username and age", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Ok", style: .default))
             present(alert, animated: true)
             return
-        }
-
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month], from: orderDatePicker.date)
-        let monthName = calendar.monthSymbols[(components.month ?? 1) - 1]
-        let year = components.year ?? 2025
-        let monthKey = "\(monthName) \(year)"
-
-        let newOrder = Order(
-            id: UUID(),
-            clientName: username,
-            totalPrice: String(amount),
-            orderDate: orderDatePicker.date,
-            deadline: deadlineDatePicker.date,
-            isPaid: paidSwitch.isOn,
-            description: descriptionTextView.text
-        )
-        
-
-        delegate?.addOrder(newOrder)
-
-        navigationController?.popViewController(animated:true)
     }
+        order.clientName = username
+        order.totalPrice = amountText
+        order.orderDate = orderDatePicker.date
+        order.deadline = deadlineDatePicker.date
+        order.isPaid = paidSwitch.isOn
+        order.description = descriptionTextView.text
+        
+        delegate?.addOrder(order)
+        
+        navigationController?.popViewController(animated: true)
+    }
+    
+    @objc func deleteTapped() {
+        let alert = UIAlertController(title: "Delete order",
+                                      message: "Are you sure you want to delete \(order.clientName)?",
+                                      preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "No", style: .cancel))
+        
+        alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { [weak self] _ in
+            guard let self = self else { return }
+            self.delegate?.deleteOrder(at: self.indexInMonth, month: self.monthName)
+            self.navigationController?.popViewController(animated: true)
+        }))
+        
+        self.present(alert, animated: true)
+    }
+
+    
 }
