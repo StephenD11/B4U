@@ -2,14 +2,14 @@
 //  NewOrderViewController.swift
 //  BusFoYo
 //
-//  Created by Stepan on 30.09.2025.
+//  Created by Stepan on 07.10.2025.
 //
 
 import UIKit
 
 protocol NewOrderDelegate: AnyObject {
     func addOrder(_ order: Order)
-    func deleteOrder(at index: Int, month: String)  
+    func deleteOrder(at index: Int, month: String)
 }
 
 class NewOrderViewController: UIViewController {

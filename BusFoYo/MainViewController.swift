@@ -18,60 +18,75 @@ class MainViewController: UIViewController {
         return lab
     }()
     
-    lazy var profileButton: UIButton = createButton(title: "Profile")
-    lazy var ordersButton: UIButton = createButton(title: "Orders")
-    lazy var clientsButton: UIButton = createButton(title: "Clients")
-    lazy var calculationsButton: UIButton = createButton(title: "Calculation")
+    lazy var bottomStack: UIStackView = {
+        let stack = UIStackView(arrangedSubviews: [profileButton, ordersButton, calculationsButton] )
+        stack.axis = .horizontal
+        stack.spacing = 20
+        stack.distribution = .fillEqually
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
     
+
+    
+    lazy var centerImageView: UIImageView = {
+        let iv = UIImageView(image: UIImage(named: "default_main"))
+        iv.contentMode = .scaleAspectFit
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
+    
+    func createBottomButton(title: String) -> UIButton {
+        let btn = UIButton(type: .system)
+        btn.setTitle(title, for: .normal)
+        btn.setTitleColor(.black, for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 15)
+        btn.layer.cornerRadius = 12
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }
+    
+    lazy var profileNextButton = {
+        let btn = UIButton()
+        btn.setTitle("", for: . normal)
+        btn.setTitleColor(.black, for: .normal)
+        btn.titleLabel?.font = .systemFont(ofSize: 14)
+        btn.layer.cornerRadius = 12
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+    
+    lazy var profileButton: UIButton = createBottomButton(title: "PROFILE")
+    lazy var ordersButton: UIButton = createBottomButton(title: "ORDERS")
+    lazy var calculationsButton: UIButton = createBottomButton(title: "CASH")
+    
+ 
+    
+    let images = ["profileImage", "ordersImage", "calculationsImage"]
+    var selectedButton: UIButton?
+    var isAnimating = false
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .white
-        title = "Main"
         setupUI()
         
         profileButton.addTarget(self, action: #selector(profileTapped), for: .touchUpInside)
         ordersButton.addTarget(self, action: #selector(ordersTapped), for: .touchUpInside)
-        clientsButton.addTarget(self, action: #selector( clientsTapped), for: .touchUpInside)
         calculationsButton.addTarget(self, action: #selector(calculationsTapped), for: .touchUpInside)
         
-        
-        
+        centerImageView.isUserInteractionEnabled = true
         
     }
-    
-    func createButton(title:String) -> UIButton {
-        let btn = UIButton(type: .system)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle(title, for: .normal)
-        btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 15)
-        btn.backgroundColor = .systemBlue
-        btn.setTitleColor(.white, for: .normal)
-        btn.layer.cornerRadius = 12
-        btn.clipsToBounds = true
-        btn.contentHorizontalAlignment = .left
-        
-        var config = UIButton.Configuration.filled()
-        config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 10)
-        config.titleAlignment = .leading
-        btn.configuration = config
-        
-        return btn
-    }
-    
-
     
     func setupUI() {
         
-        let stack = UIStackView(arrangedSubviews: [profileButton, ordersButton, clientsButton, calculationsButton])
-        stack.translatesAutoresizingMaskIntoConstraints = false
-        stack.axis = .vertical
-        stack.spacing = 20
-        stack.distribution = .fillEqually
-        
         view.addSubview(mainLabel)
-        view.addSubview(stack)
+        view.addSubview(centerImageView)
+        view.addSubview(profileNextButton)
+        view.addSubview(bottomStack)
         
         NSLayoutConstraint.activate ([
             
@@ -80,36 +95,132 @@ class MainViewController: UIViewController {
             mainLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
             mainLabel.heightAnchor.constraint(equalToConstant: 44),
             
-            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
-            stack.heightAnchor.constraint(equalToConstant: 300) 
-            
+            centerImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            centerImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
+            centerImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
+            centerImageView.heightAnchor.constraint(equalTo: centerImageView.widthAnchor),
+        
+
+                    
+            bottomStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            bottomStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -25),
+            bottomStack.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9),
+            bottomStack.heightAnchor.constraint(equalToConstant: 50)
             
         ])
     }
     
-    
     @objc func profileTapped() {
-        let vs = ProfileViewController()
-        navigationController?.pushViewController(vs, animated: true)
+        changeCenterImage(to: images[0], selected: profileButton)
     }
     
     @objc func ordersTapped() {
-        let vs =  OrdersViewController()
-        navigationController?.pushViewController(vs, animated: true)
-    }
-    
-    @objc func clientsTapped() {
-        let vs = ClientsViewController()
-        navigationController?.pushViewController(vs, animated: true)
+        changeCenterImage(to: images[1], selected: ordersButton)
     }
     
     @objc func calculationsTapped() {
-        let vs = CalculationsViewController()
-        navigationController?.pushViewController(vs, animated: true)
+        changeCenterImage(to: images[2], selected: calculationsButton)
+    }
+    
+    func changeCenterImage(to imageName: String, selected button: UIButton) {
+        guard selectedButton !== button else { return }
+        guard !isAnimating else { return }
+        isAnimating = true
+
+        let oldImageView = self.centerImageView
+
+        let oldButton = view.viewWithTag(999)
+
+        let newImageView = UIImageView(image: UIImage(named: imageName))
+        newImageView.contentMode = .scaleAspectFit
+        newImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(newImageView)
+
+        NSLayoutConstraint.activate([
+            newImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            newImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
+            newImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
+            newImageView.heightAnchor.constraint(equalTo: newImageView.widthAnchor),
+        ])
+
+        let buttonTitle: String
+        switch imageName {
+        case "profileImage":
+            buttonTitle = "ENTER TO PROFILE"
+        case "ordersImage":
+            buttonTitle = "SEE YOUR ORDERS"
+        case "calculationsImage":
+            buttonTitle = "CHECK YOUR CASH"
+        default:
+            buttonTitle = "ACTION"
+        }
+        
+        
+        let imageActionButton = UIButton(type: .system)
+        
+        imageActionButton.tag = 999
+        imageActionButton.setTitle(buttonTitle, for: .normal)
+        imageActionButton.setTitleColor(.white, for: .normal)
+        imageActionButton.titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
+        imageActionButton.backgroundColor = UIColor(red: 1.0, green: 0.55, blue: 0.0, alpha: 1.0)
+        imageActionButton.layer.cornerRadius = 6
+        imageActionButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        imageActionButton.addTarget(self, action: #selector(imageButtonTapped), for: .touchUpInside)
+        
+        view.addSubview(imageActionButton)
+        NSLayoutConstraint.activate([
+            imageActionButton.topAnchor.constraint(equalTo: newImageView.bottomAnchor, constant: 15),
+            imageActionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            imageActionButton.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.4),
+            imageActionButton.heightAnchor.constraint(equalToConstant: 28),
+        ])
+
+        newImageView.transform = CGAffineTransform(translationX: view.frame.width, y: 0)
+        imageActionButton.transform = CGAffineTransform(translationX: view.frame.width, y: 0)
+
+        view.layoutIfNeeded()
+
+        UIView.animate(withDuration: 0.4, animations: {
+            oldImageView.transform = CGAffineTransform(translationX: -self.view.frame.width, y: 0)
+            oldButton?.transform = CGAffineTransform(translationX: -self.view.frame.width, y: 0)
+            newImageView.transform = .identity
+            imageActionButton.transform = .identity
+        }, completion: { _ in
+            oldImageView.removeFromSuperview()
+            oldButton?.removeFromSuperview()
+            self.centerImageView = newImageView
+            self.isAnimating = false
+        })
+
+        self.selectedButton?.setTitleColor(.black, for: .normal)
+        button.setTitleColor(.orange, for: .normal)
+
+        UIView.animate(withDuration: 0.3) {
+            self.selectedButton?.transform = .identity
+            button.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+        }
+
+        selectedButton = button
+    }
+
+    @objc func imageButtonTapped(_ sender: UIButton) {
+        if sender.title(for: .normal) == "ENTER TO PROFILE" {
+            let profileVC = ProfileViewController()
+            navigationController?.pushViewController(profileVC, animated: true)
+        }
+        
+        if sender.title(for: .normal) == "SEE YOUR ORDERS" {
+            let ordersVC = OrdersViewController()
+            navigationController?.pushViewController(ordersVC, animated: true)
+        }
+        
+        if sender.title(for: .normal) == "CHECK YOUR CASH" {
+            let calculationVC = CalculationsViewController()
+            navigationController?.pushViewController(calculationVC, animated: true)
+        }
+        
+        
     }
     
 }
-
-
