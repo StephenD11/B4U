@@ -10,10 +10,15 @@ import UIKit
 class OrderDetailViewController: UIViewController {
     
     weak var delegate: NewOrderDelegate?
+    weak var incomeDelegate: NewOrderIncomeDelegate?
+    
+    
     var order: Order
     var monthName: String!
     var indexInMonth: Int!
     var orderNumber: Int?
+    
+    
 
     
     init(order: Order) {
@@ -53,6 +58,15 @@ class OrderDetailViewController: UIViewController {
         dp.translatesAutoresizingMaskIntoConstraints = false
         dp.datePickerMode = .date
         return dp
+    }()
+    
+    lazy var phoneField: UITextField = {
+        let tf = UITextField()
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.placeholder = "Phone Number"
+        tf.borderStyle = .roundedRect
+        tf.keyboardType = .phonePad
+        return tf
     }()
     
     lazy var orderDatePickerLabel: UILabel = {
@@ -118,6 +132,7 @@ class OrderDetailViewController: UIViewController {
     lazy var orderTotalPriceLabel: UILabel = makeLabel(withText: "Total price:")
     lazy var orderDescriptionLabel: UILabel = makeLabel(withText: "Description:")
     lazy var orderNumberLabel: UILabel = makeLabel(withText: "ORDER NUMBER \(orderNumber ?? 0)")
+    lazy var phoneLabel: UILabel = makeLabel(withText: "Phone:")
 
     
     
@@ -152,6 +167,10 @@ class OrderDetailViewController: UIViewController {
         view.addSubview(orderDescriptionLabel)
         view.addSubview(descriptionTextView)
         
+        view.addSubview(phoneField)
+        view.addSubview(phoneLabel)
+
+        
         view.addSubview(saveButton)
         view.addSubview(deleteButton)
         
@@ -174,7 +193,20 @@ class OrderDetailViewController: UIViewController {
             amountFiled.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
             amountFiled.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
             
-            orderDatePickerLabel.topAnchor.constraint(equalTo: amountFiled.bottomAnchor, constant: 25),
+            phoneLabel.topAnchor.constraint(equalTo: amountFiled.bottomAnchor, constant: 15),
+            phoneLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
+            
+            phoneField.topAnchor.constraint(equalTo: phoneLabel.bottomAnchor, constant: 5),
+            phoneField.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
+            phoneField.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
+            phoneField.heightAnchor.constraint(equalToConstant: 40),
+            
+            phoneField.topAnchor.constraint(equalTo: phoneField.bottomAnchor, constant: 10),
+            phoneField.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
+            phoneField.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
+            phoneField.heightAnchor.constraint(equalToConstant: 40),
+            
+            orderDatePickerLabel.topAnchor.constraint(equalTo: phoneField.bottomAnchor, constant: 25),
             orderDatePickerLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
             
             orderDatePicker.centerYAnchor.constraint(equalTo: orderDatePickerLabel.centerYAnchor),
@@ -227,6 +259,7 @@ class OrderDetailViewController: UIViewController {
         deadlineDatePicker.date = order.deadline
         paidSwitch.isOn = order.isPaid
         descriptionTextView.text = order.description
+        phoneField.text = order.phoneNumber
     }
     
     @objc func saveTapped() {
@@ -242,6 +275,12 @@ class OrderDetailViewController: UIViewController {
         order.deadline = deadlineDatePicker.date
         order.isPaid = paidSwitch.isOn
         order.description = descriptionTextView.text
+        order.phoneNumber = phoneField.text ?? ""
+        
+        if let priceDouble = Double(amountText) {
+                let updatedIncome = Income(clientName: username, totalPrice: priceDouble)
+                incomeDelegate?.addIncome(updatedIncome)
+            }
         
         delegate?.addOrder(order)
         

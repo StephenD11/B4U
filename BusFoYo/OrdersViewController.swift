@@ -13,6 +13,8 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
     var ordersByMonth: [String: [Order]] = [:]
     var allOrdersByMonth: [String: [Order]] = [:]
     
+    weak var calculationsVC: CalculationsViewController?
+    
     var sortedMonths: [String] = []
     var activeMonths: [String] {
         return ordersByMonth
@@ -136,6 +138,7 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
     @objc func addNewOrderTapped() {
         let newOrderVC = NewOrderViewController()
         newOrderVC.delegate = self
+        newOrderVC.incomeDelegate = calculationsVC
 
         let orderNumber = allOrdersByMonth.values.flatMap { $0 }.count + 1
         newOrderVC.orderNumber = orderNumber
@@ -144,13 +147,17 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
     }
     
     func saveOrders() {
+        guard let currentUser = UserManager.shared.currentUser else { return }
+        let key = "allOrders_\(currentUser.username)"
         if let data = try? JSONEncoder().encode(allOrdersByMonth) {
-            UserDefaults.standard.set(data, forKey: "allOrders")
+            UserDefaults.standard.set(data, forKey: key)
         }
     }
 
     func loadOrders() {
-        if let data = UserDefaults.standard.data(forKey: "allOrders"),
+        guard let currentUser = UserManager.shared.currentUser else { return }
+        let key = "allOrders_\(currentUser.username)"
+        if let data = UserDefaults.standard.data(forKey: key),
            let savedOrders = try? JSONDecoder().decode([String: [Order]].self, from: data) {
             ordersByMonth = savedOrders
             allOrdersByMonth = savedOrders
@@ -182,6 +189,7 @@ extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
 
         let detailVC = OrderDetailViewController(order: order)
         detailVC.delegate = self
+        detailVC.incomeDelegate = calculationsVC   
         detailVC.monthName = month
         detailVC.indexInMonth = indexPath.row
         detailVC.orderNumber = globalOrderNumber(for: indexPath)
@@ -204,7 +212,7 @@ extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.font = UIFont.systemFont(ofSize: 15)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 14)
         
         let month = activeMonths[indexPath.section]
         
@@ -230,7 +238,8 @@ extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
         paragraphStyle.lineSpacing = 6
         attributedText.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSMakeRange(0, fullText.count))
         
-        cell.textLabel?.numberOfLines = 0
+        cell.textLabel?.numberOfLines = 1
+        cell.textLabel?.lineBreakMode = .byTruncatingTail
         cell.textLabel?.attributedText = attributedText
         
         return cell

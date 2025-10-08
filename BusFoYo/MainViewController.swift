@@ -8,6 +8,8 @@ import UIKit
 
 class MainViewController: UIViewController {
     
+    var calculationsVC: CalculationsViewController = CalculationsViewController()
+    
     lazy var mainLabel: UILabel = {
        let lab = UILabel()
         lab.text = "\(UserManager.shared.currentUser?.company ?? "")"
@@ -212,13 +214,13 @@ class MainViewController: UIViewController {
         
         if sender.title(for: .normal) == "SEE YOUR ORDERS" {
             let ordersVC = OrdersViewController()
+            ordersVC.calculationsVC = self.calculationsVC
             navigationController?.pushViewController(ordersVC, animated: true)
         }
         
         if sender.title(for: .normal) == "CHECK YOUR CASH" {
-            let calculationVC = CalculationsViewController()
-            navigationController?.pushViewController(calculationVC, animated: true)
-        }
+                navigationController?.pushViewController(calculationsVC, animated: true)
+            }
         
         
     }

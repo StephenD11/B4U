@@ -12,9 +12,13 @@ protocol NewOrderDelegate: AnyObject {
     func deleteOrder(at index: Int, month: String)
 }
 
+protocol NewOrderIncomeDelegate: AnyObject {
+    func addIncome(_ income: Income)
+}
+
 class NewOrderViewController: UIViewController {
     
-
+    weak var incomeDelegate: NewOrderIncomeDelegate?
     
     weak var delegate: NewOrderDelegate?
     var orderNumber: Int?
@@ -37,6 +41,15 @@ class NewOrderViewController: UIViewController {
         tf.borderStyle = .roundedRect
         tf.placeholder = "00.00"
         tf.keyboardType = .numberPad
+        return tf
+    }()
+    
+    lazy var phoneField: UITextField = {
+        let tf = UITextField()
+        tf.translatesAutoresizingMaskIntoConstraints = false
+        tf.placeholder = "Phone Number"
+        tf.borderStyle = .roundedRect
+        tf.keyboardType = .phonePad
         return tf
     }()
 
@@ -81,7 +94,6 @@ class NewOrderViewController: UIViewController {
         return lbl
     }()
     
-
     
     lazy var descriptionTextView: UITextView = {
         let tv = UITextView()
@@ -97,7 +109,7 @@ class NewOrderViewController: UIViewController {
         let btn = UIButton()
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Save order", for: .normal)
-        btn.titleLabel?.font = .systemFont(ofSize: 18)
+        btn.titleLabel?.font = .systemFont(ofSize: 16)
         btn.setTitleColor(.systemBlue, for: .normal)
         btn.layer.cornerRadius = 10
         btn.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
@@ -109,6 +121,7 @@ class NewOrderViewController: UIViewController {
     lazy var totalPrice: UILabel = makeLabel(withText: "Total price:")
     lazy var clientDescriptionLabel: UILabel = makeLabel(withText: "Description:")
     lazy var orderNumberLabel: UILabel = makeLabel(withText: "ORDER NUMBER \(orderNumber ?? 0)")
+    lazy var phoneLabel: UILabel = makeLabel(withText: "Phone:")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -126,6 +139,9 @@ class NewOrderViewController: UIViewController {
         
         view.addSubview(totalPrice)
         view.addSubview(amountField)
+        
+        view.addSubview(phoneField)
+        view.addSubview(phoneLabel)
         
         view.addSubview(orderDatePickerLabel)
         view.addSubview(orderDatePicker)
@@ -162,7 +178,15 @@ class NewOrderViewController: UIViewController {
             amountField.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
             amountField.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
             
-            orderDatePickerLabel.topAnchor.constraint(equalTo: amountField.bottomAnchor, constant: 25),
+            phoneLabel.topAnchor.constraint(equalTo: amountField.bottomAnchor, constant: 15),
+            phoneLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
+            
+            phoneField.topAnchor.constraint(equalTo: phoneLabel.bottomAnchor, constant: 5),
+            phoneField.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
+            phoneField.trailingAnchor.constraint(equalTo: usernameField.trailingAnchor),
+            phoneField.heightAnchor.constraint(equalToConstant: 40),
+            
+            orderDatePickerLabel.topAnchor.constraint(equalTo: phoneField.bottomAnchor, constant: 25),
             orderDatePickerLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor),
             
             orderDatePicker.centerYAnchor.constraint(equalTo: orderDatePickerLabel.centerYAnchor),
@@ -221,7 +245,7 @@ class NewOrderViewController: UIViewController {
         let components = calendar.dateComponents([.year, .month], from: orderDatePicker.date)
         let monthName = calendar.monthSymbols[(components.month ?? 1) - 1]
         let year = components.year ?? 2025
-        let monthKey = "\(monthName) \(year)"
+        _ = "\(monthName) \(year)"
 
         let newOrder = Order(
             id: UUID(),
@@ -230,11 +254,18 @@ class NewOrderViewController: UIViewController {
             orderDate: orderDatePicker.date,
             deadline: deadlineDatePicker.date,
             isPaid: paidSwitch.isOn,
-            description: descriptionTextView.text
+            description: descriptionTextView.text,
+            phoneNumber: phoneField.text ?? ""
         )
-        
+
+        if let priceString = newOrder.totalPrice, let totalPrice = Double(priceString) {
+            let income = Income(clientName: newOrder.clientName, totalPrice: totalPrice)
+            incomeDelegate?.addIncome(income)
+        }
 
         delegate?.addOrder(newOrder)
+        
+        NotificationCenter.default.post(name: .newOrderAdded, object: nil, userInfo: ["order": newOrder])
 
         navigationController?.popViewController(animated:true)
     }

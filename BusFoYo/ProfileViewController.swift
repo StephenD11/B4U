@@ -188,7 +188,7 @@ class ProfileViewController: UIViewController {
         let updateUser = User(username: username, company: company, pin: pin)
         UserManager.shared.saveUser(updateUser)
         
-        let alert = UIAlertController(title: "Succes", message: "Profile Updated", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Success ✅", message: "Profile Updated", preferredStyle: .alert)
         
         let mainVC = MainViewController()
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { [weak self] _ in

@@ -117,12 +117,12 @@ class PinCodeViewController: UIViewController {
                 return
             }
             
-            guard let user = UserManager.shared.currentUser, user.username == username else {
+            guard let user = UserManager.shared.currentUser, user.username.lowercased() == username.lowercased() || user.username == username else {
                 self?.showAlert(message: "No user found with this username")
                 return
             }
             
-            let pinAlert = UIAlertController(title: "Succes ✅ ", message: "Your pin is: \(user.pin)", preferredStyle: .alert)
+            let pinAlert = UIAlertController(title: "Success ✅ ", message: "Your pin is: \(user.pin)", preferredStyle: .alert)
             pinAlert.addAction(UIAlertAction(title: "OK", style: .default))
             self?.present(pinAlert, animated: true)
         }))

@@ -15,6 +15,7 @@ struct Order: Codable, Identifiable{
     var deadline: Date
     var isPaid: Bool
     var description: String?
+    var phoneNumber: String?
     
     var monthName: String {
         let calendar = Calendar.current

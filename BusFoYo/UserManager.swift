@@ -33,4 +33,10 @@ final class UserManager {
     func removeCurrentUser() {
         defaults.removeObject(forKey: key)
     }
+    
+    func deleteUser(username: String) {
+        defaults.removeObject(forKey: "allOrders_\(username)")
+        defaults.removeObject(forKey: "savedExpenses_\(username)")
+        defaults.removeObject(forKey: "savedIncomes_\(username)")
+    }
 }
