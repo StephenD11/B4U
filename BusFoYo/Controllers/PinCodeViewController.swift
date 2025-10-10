@@ -18,6 +18,15 @@ class PinCodeViewController: UIViewController {
         
         tf.isSecureTextEntry = true
         tf.textAlignment = .center
+        tf.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+        }
+        
+        tf.textColor = .label
+        tf.attributedPlaceholder = NSAttributedString(string: tf.placeholder ?? "", attributes: [.foregroundColor: UIColor.secondaryLabel]
+        )
+        
+        
         return tf
     }()
     
@@ -43,8 +52,11 @@ class PinCodeViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         setupUI()
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
         
         pinTextField.keyboardType = .numberPad
         pinTextField.addTarget(self, action: #selector(limitPin), for: .editingChanged)
@@ -71,6 +83,10 @@ class PinCodeViewController: UIViewController {
         ])
         
 
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 
     @objc func enterTapped() {

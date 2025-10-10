@@ -8,51 +8,7 @@
 
 import UIKit
 
-struct Income: Codable {
-    var clientName: String
-    var totalPrice: Double
-}
 
-struct Expense: Codable {
-    var name: String
-    var amount: Double
-}
-
-class IncomeExpenseCell: UITableViewCell {
-    let nameLabel = UILabel()
-    let amountLabel = UILabel()
-
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-        amountLabel.translatesAutoresizingMaskIntoConstraints = false
-        amountLabel.textAlignment = .right
-
-        contentView.addSubview(nameLabel)
-        contentView.addSubview(amountLabel)
-
-        NSLayoutConstraint.activate([
-            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            nameLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-
-            amountLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            amountLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
-            amountLabel.widthAnchor.constraint(equalToConstant: 100),
-
-            nameLabel.trailingAnchor.constraint(lessThanOrEqualTo: amountLabel.leadingAnchor, constant: -8)
-        ])
-
-        nameLabel.font = UIFont.systemFont(ofSize: 13)
-        amountLabel.font = UIFont.systemFont(ofSize: 13)
-        layer.cornerRadius = 12
-        clipsToBounds = true
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
 
 class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
     
@@ -60,9 +16,13 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
     var incomes: [Income] = []
     var expenses: [Expense] = []
     
+    
     lazy var totalIncomeLabel: UILabel = makeLabel(text: "Total Income: 0")
     lazy var totalExpenseLabel: UILabel = makeLabel(text: "Total Expenses: 0")
     lazy var totalLabel: UILabel = makeLabel(text: "TOTAL: 0", fontSize: 18, textColor: .black)
+    
+    lazy var incomeHeaderLabel: UILabel = makeLabel(text: "INCOME", fontSize: 14, textColor: .white)
+    lazy var expenseHeaderLabel: UILabel = makeLabel(text: "EXPENSES", fontSize: 14, textColor: .white)
     
     lazy var incomeTableView: UITableView = {
         let tv = UITableView()
@@ -91,14 +51,17 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
         lbl.translatesAutoresizingMaskIntoConstraints = false
         lbl.text = text
         lbl.font = UIFont.boldSystemFont(ofSize: fontSize)
-        lbl.textColor = textColor
+        lbl.textColor = .label
         return lbl
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         title = "Calculations"
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
         
         loadExpenses()
         loadIncomes()
@@ -106,41 +69,83 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
         updateTotals()
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleNewOrder(_:)), name: .newOrderAdded, object: nil)
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleOrderDeleted(_:)), name: .orderDeleted, object: nil)
+
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addExpense))
     }
     
     
     func setupUI() {
+        view.addSubview(incomeHeaderLabel)
         view.addSubview(incomeTableView)
-        view.addSubview(expenseTableView)
         view.addSubview(totalIncomeLabel)
+        view.addSubview(expenseHeaderLabel)
+        view.addSubview(expenseTableView)
         view.addSubview(totalExpenseLabel)
         view.addSubview(totalLabel)
+        
+        
+
+        incomeHeaderLabel.backgroundColor = UIColor.systemGreen
+        expenseHeaderLabel.backgroundColor = UIColor.systemRed
+        incomeHeaderLabel.textColor = .white
+        expenseHeaderLabel.textColor = .white
+        incomeHeaderLabel.textAlignment = .center
+        expenseHeaderLabel.textAlignment = .center
+        
+        incomeHeaderLabel.layer.cornerRadius = 8
+        incomeHeaderLabel.clipsToBounds = true
+        expenseHeaderLabel.layer.cornerRadius = 8
+        expenseHeaderLabel.clipsToBounds = true
 
         NSLayoutConstraint.activate([
-            incomeTableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            incomeHeaderLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            incomeHeaderLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            incomeHeaderLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            incomeHeaderLabel.heightAnchor.constraint(equalToConstant: 25),
+
+            incomeTableView.topAnchor.constraint(equalTo: incomeHeaderLabel.bottomAnchor, constant: 5),
             incomeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             incomeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            incomeTableView.heightAnchor.constraint(equalToConstant: 250),
+            incomeTableView.heightAnchor.constraint(equalToConstant: 200),
 
-            
-            totalIncomeLabel.topAnchor.constraint(equalTo: incomeTableView.bottomAnchor, constant: 5),
+            totalIncomeLabel.topAnchor.constraint(equalTo: incomeTableView.bottomAnchor, constant: 15),
             totalIncomeLabel.leadingAnchor.constraint(equalTo: incomeTableView.leadingAnchor),
-            
-            expenseTableView.topAnchor.constraint(equalTo: totalIncomeLabel.bottomAnchor, constant: 20),
+
+            expenseHeaderLabel.topAnchor.constraint(equalTo: totalIncomeLabel.bottomAnchor, constant: 20),
+            expenseHeaderLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            expenseHeaderLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            expenseHeaderLabel.heightAnchor.constraint(equalToConstant: 25),
+
+            expenseTableView.topAnchor.constraint(equalTo: expenseHeaderLabel.bottomAnchor, constant: 5),
             expenseTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             expenseTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            expenseTableView.heightAnchor.constraint(equalToConstant: 250),
-            
-            totalExpenseLabel.topAnchor.constraint(equalTo: expenseTableView.bottomAnchor, constant: 5),
+            expenseTableView.heightAnchor.constraint(equalToConstant: 200),
+
+            totalExpenseLabel.topAnchor.constraint(equalTo: expenseTableView.bottomAnchor, constant: 15),
             totalExpenseLabel.leadingAnchor.constraint(equalTo: expenseTableView.leadingAnchor),
-            
-            totalLabel.topAnchor.constraint(equalTo: totalExpenseLabel.bottomAnchor, constant: 20),
+
+            totalLabel.topAnchor.constraint(equalTo: totalExpenseLabel.bottomAnchor, constant: 15),
             totalLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
         ])
     }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    @objc func handleOrderDeleted(_ notification: Notification) {
+        guard let clientName = notification.userInfo?["clientName"] as? String else { return }
+
+        if let index = incomes.firstIndex(where: { $0.clientName == clientName }) {
+            incomes.remove(at: index)
+            saveIncomes()
+            incomeTableView.reloadData()
+            updateTotals()
+        }
+    }
+    
     
     func updateTotals() {
         let incomeSum = incomes.reduce(0) { $0 + $1.totalPrice }
@@ -223,7 +228,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
         if let index = incomes.firstIndex(where: { $0.clientName == income.clientName }) {
             incomes[index] = income
         } else {
-            incomes.append(income)   
+            incomes.append(income)
         }
         saveIncomes()
         incomeTableView.reloadData()
@@ -236,77 +241,49 @@ extension CalculationsViewController: UITableViewDataSource, UITableViewDelegate
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == incomeTableView {
-            return incomes.count + 1
+            return incomes.count
         } else {
-            return expenses.count + 1
+            return expenses.count
         }
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableView == incomeTableView {
             let cell = tableView.dequeueReusableCell(withIdentifier: "IncomeExpenseCell", for: indexPath) as! IncomeExpenseCell
-            if indexPath.row == 0 {
-                cell.nameLabel.text = "INCOME"
-                cell.amountLabel.text = ""
-                let bgView = UIView()
-                bgView.backgroundColor = .systemGreen
-                cell.backgroundView = bgView
-                cell.nameLabel.textColor = .white
-                cell.amountLabel.textColor = .white
-                cell.nameLabel.font = UIFont.boldSystemFont(ofSize: 14)
-                cell.selectionStyle = .none
-            } else {
-                let income = incomes[indexPath.row - 1]
-                cell.nameLabel.text = "📍 \(income.clientName)"
-                cell.amountLabel.text = String(format: "%.2f", income.totalPrice)
-                cell.nameLabel.textColor = .black
-                cell.amountLabel.textColor = .black
-                cell.backgroundColor = .clear
-                cell.backgroundView = nil
-                cell.nameLabel.font = UIFont.systemFont(ofSize: 13)
-                cell.amountLabel.font = UIFont.systemFont(ofSize: 13)
-                cell.selectionStyle = .default
-            }
+            let income = incomes[indexPath.row]
+            cell.nameLabel.text = "📍 \(income.clientName)"
+            cell.amountLabel.text = String(format: "%.2f", income.totalPrice)
+            cell.nameLabel.textColor = .label
+            cell.amountLabel.textColor = .label
+            cell.backgroundView = nil
+            cell.nameLabel.font = UIFont.systemFont(ofSize: 13)
+            cell.amountLabel.font = UIFont.systemFont(ofSize: 13)
+            cell.selectionStyle = .default
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "IncomeExpenseCell", for: indexPath) as! IncomeExpenseCell
-            if indexPath.row == 0 {
-                cell.nameLabel.text = "EXPENSES"
-                cell.amountLabel.text = ""
-                let bgView = UIView()
-                bgView.backgroundColor = .systemRed
-                cell.backgroundView = bgView
-                cell.nameLabel.textColor = .white
-                cell.amountLabel.textColor = .white
-                cell.nameLabel.font = UIFont.boldSystemFont(ofSize: 14)
-                cell.selectionStyle = .none
-            } else {
-                let expense = expenses[indexPath.row - 1]
-                cell.nameLabel.text = "📍 \(expense.name)"
-                cell.amountLabel.text = String(format: "%.2f", expense.amount)
-                cell.nameLabel.textColor = .black
-                cell.amountLabel.textColor = .black
-                cell.backgroundColor = .clear
-                cell.backgroundView = nil
-                cell.nameLabel.font = UIFont.systemFont(ofSize: 13)
-                cell.amountLabel.font = UIFont.systemFont(ofSize: 13)
-                cell.selectionStyle = .default
-            }
+            let expense = expenses[indexPath.row]
+            cell.nameLabel.text = "📍 \(expense.name)"
+            cell.amountLabel.text = String(format: "%.2f", expense.amount)
+            cell.nameLabel.textColor = .label
+            cell.amountLabel.textColor = .label
+            cell.backgroundView = nil
+            cell.nameLabel.font = UIFont.systemFont(ofSize: 13)
+            cell.amountLabel.font = UIFont.systemFont(ofSize: 13)
+            cell.selectionStyle = .default
             return cell
         }
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            guard indexPath.row != 0 else { return }
-            
             if tableView == expenseTableView {
-                expenses.remove(at: indexPath.row - 1)
+                expenses.remove(at: indexPath.row)
                 saveExpenses()
                 tableView.deleteRows(at: [indexPath], with: .fade)
                 updateTotals()
             } else if tableView == incomeTableView {
-                incomes.remove(at: indexPath.row - 1)
+                incomes.remove(at: indexPath.row)
                 saveIncomes()
                 tableView.deleteRows(at: [indexPath], with: .fade)
                 updateTotals()

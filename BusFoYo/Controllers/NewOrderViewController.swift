@@ -31,6 +31,14 @@ class NewOrderViewController: UIViewController {
         tf.translatesAutoresizingMaskIntoConstraints = false
         tf.placeholder = "Username"
         tf.borderStyle = .roundedRect
+        tf.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+        }
+        
+        tf.textColor = .label
+            tf.attributedPlaceholder = NSAttributedString(string: tf.placeholder ?? "",
+                attributes: [.foregroundColor: UIColor.secondaryLabel]
+            )
         return tf
     }()
 
@@ -41,6 +49,14 @@ class NewOrderViewController: UIViewController {
         tf.borderStyle = .roundedRect
         tf.placeholder = "00.00"
         tf.keyboardType = .numberPad
+        tf.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+        }
+        
+        tf.textColor = .label
+            tf.attributedPlaceholder = NSAttributedString(string: tf.placeholder ?? "",
+                attributes: [.foregroundColor: UIColor.secondaryLabel]
+            )
         return tf
     }()
     
@@ -50,6 +66,14 @@ class NewOrderViewController: UIViewController {
         tf.placeholder = "Phone Number"
         tf.borderStyle = .roundedRect
         tf.keyboardType = .phonePad
+        tf.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+        }
+        
+        tf.textColor = .label
+            tf.attributedPlaceholder = NSAttributedString(string: tf.placeholder ?? "",
+                attributes: [.foregroundColor: UIColor.secondaryLabel]
+            )
         return tf
     }()
 
@@ -102,6 +126,7 @@ class NewOrderViewController: UIViewController {
         tv.layer.borderWidth = 1.0
         tv.layer.cornerRadius = 8
         tv.font = UIFont.systemFont(ofSize: 16)
+        
         return tv
     }()
     
@@ -117,6 +142,20 @@ class NewOrderViewController: UIViewController {
         
     }()
     
+    lazy var scrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.alwaysBounceVertical = true
+        scroll.contentInsetAdjustmentBehavior = .never 
+        return scroll
+    }()
+
+    lazy var contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     lazy var clientNameLabel: UILabel = makeLabel(withText: "Client name:")
     lazy var totalPrice: UILabel = makeLabel(withText: "Total price:")
     lazy var clientDescriptionLabel: UILabel = makeLabel(withText: "Description:")
@@ -125,51 +164,90 @@ class NewOrderViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         title = "New Order"
+        
+        
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
         
         setupUI()
     }
     
     func setupUI() {
-        view.addSubview(orderNumberLabel)
         
-        view.addSubview(clientNameLabel)
-        view.addSubview(usernameField)
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
         
-        view.addSubview(totalPrice)
-        view.addSubview(amountField)
         
-        view.addSubview(phoneField)
-        view.addSubview(phoneLabel)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        ])
         
-        view.addSubview(orderDatePickerLabel)
-        view.addSubview(orderDatePicker)
+        contentView.addSubview(orderNumberLabel)
         
-        view.addSubview(deadlineDatePickerLabel)
-        view.addSubview(deadlineDatePicker)
+        contentView.addSubview(clientNameLabel)
+        contentView.addSubview(usernameField)
         
-        view.addSubview(paidLabel)
-        view.addSubview(paidSwitch)
+        contentView.addSubview(totalPrice)
+        contentView.addSubview(amountField)
         
-        view.addSubview(clientDescriptionLabel)
-        view.addSubview(descriptionTextView)
+        contentView.addSubview(phoneField)
+        contentView.addSubview(phoneLabel)
         
-        view.addSubview(saveButton)
+        contentView.addSubview(orderDatePickerLabel)
+        contentView.addSubview(orderDatePicker)
+        
+        contentView.addSubview(deadlineDatePickerLabel)
+        contentView.addSubview(deadlineDatePicker)
+        
+        contentView.addSubview(paidLabel)
+        contentView.addSubview(paidSwitch)
+        
+        contentView.addSubview(clientDescriptionLabel)
+        contentView.addSubview(descriptionTextView)
+        
+        contentView.addSubview(saveButton)
+        
+
         
         NSLayoutConstraint.activate([
             
             
             
-            orderNumberLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 25),
+            orderNumberLabel.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor, constant: 25),
             orderNumberLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
             
             clientNameLabel.topAnchor.constraint(equalTo: orderNumberLabel.topAnchor, constant: 35),
             clientNameLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
             
             usernameField.topAnchor.constraint(equalTo: clientNameLabel.bottomAnchor, constant: 5),
-            usernameField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            usernameField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            usernameField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            usernameField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
             totalPrice.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 15),
             totalPrice.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
@@ -213,13 +291,31 @@ class NewOrderViewController: UIViewController {
             descriptionTextView.heightAnchor.constraint(equalToConstant: 120),
 
             
-            saveButton.topAnchor.constraint(equalTo: descriptionTextView.bottomAnchor, constant: 20),
-            saveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            saveButton.topAnchor.constraint(equalTo: descriptionTextView.bottomAnchor, constant: 8),
+            saveButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             saveButton.widthAnchor.constraint(equalToConstant: 200),
             saveButton.heightAnchor.constraint(equalToConstant: 50),
             
             
         ])
+        
+        contentView.bottomAnchor.constraint(equalTo: saveButton.bottomAnchor, constant: 30).isActive = true
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardFrame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            scrollView.contentInset.bottom = keyboardFrame.height
+            scrollView.verticalScrollIndicatorInsets.bottom = keyboardFrame.height
+        }
+    }
+
+    @objc func keyboardWillHide(notification: NSNotification) {
+        scrollView.contentInset.bottom = 0
+        scrollView.verticalScrollIndicatorInsets.bottom = 0
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     func makeLabel(withText text: String, fontSize: CGFloat = 14, textColor: UIColor = .gray) -> UILabel {

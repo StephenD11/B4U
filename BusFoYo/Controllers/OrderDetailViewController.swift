@@ -113,7 +113,8 @@ class OrderDetailViewController: UIViewController {
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.setTitle("Save changes", for: .normal)
         btn.setTitleColor(.systemBlue, for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         btn.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
         return btn
     }()
@@ -134,12 +135,41 @@ class OrderDetailViewController: UIViewController {
     lazy var orderNumberLabel: UILabel = makeLabel(withText: "ORDER NUMBER \(orderNumber ?? 0)")
     lazy var phoneLabel: UILabel = makeLabel(withText: "Phone:")
 
-    
+    lazy var scrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.translatesAutoresizingMaskIntoConstraints = false
+        scroll.alwaysBounceVertical = true
+        scroll.contentInsetAdjustmentBehavior = .never
+        return scroll
+    }()
+
+    lazy var contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillShow),
+            name: UIResponder.keyboardWillShowNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(keyboardWillHide),
+            name: UIResponder.keyboardWillHideNotification,
+            object: nil
+        )
+        
+        view.backgroundColor = .systemBackground
         title = "ℹ️ \(order.clientName)"
         setupUI()
         populateFields()
@@ -147,44 +177,62 @@ class OrderDetailViewController: UIViewController {
     
     
     func setupUI() {
-        view.addSubview(orderNumberLabel)
         
-        view.addSubview(clientNameLabel)
-        view.addSubview(usernameField)
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
         
-        view.addSubview(orderTotalPriceLabel)
-        view.addSubview(amountFiled)
         
-        view.addSubview(orderDatePickerLabel)
-        view.addSubview(orderDatePicker)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+        ])
         
-        view.addSubview(deadlineDatePickerLabel)
-        view.addSubview(deadlineDatePicker)
+        contentView.addSubview(orderNumberLabel)
         
-        view.addSubview(paidLabel)
-        view.addSubview(paidSwitch)
+        contentView.addSubview(clientNameLabel)
+        contentView.addSubview(usernameField)
         
-        view.addSubview(orderDescriptionLabel)
-        view.addSubview(descriptionTextView)
+        contentView.addSubview(orderTotalPriceLabel)
+        contentView.addSubview(amountFiled)
         
-        view.addSubview(phoneField)
-        view.addSubview(phoneLabel)
+        contentView.addSubview(orderDatePickerLabel)
+        contentView.addSubview(orderDatePicker)
+        
+        contentView.addSubview(deadlineDatePickerLabel)
+        contentView.addSubview(deadlineDatePicker)
+        
+        contentView.addSubview(paidLabel)
+        contentView.addSubview(paidSwitch)
+        
+        contentView.addSubview(orderDescriptionLabel)
+        contentView.addSubview(descriptionTextView)
+        
+        contentView.addSubview(phoneField)
+        contentView.addSubview(phoneLabel)
 
         
-        view.addSubview(saveButton)
-        view.addSubview(deleteButton)
+        contentView.addSubview(saveButton)
+        contentView.addSubview(deleteButton)
         
         NSLayoutConstraint.activate([
             
-            orderNumberLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 25),
+            orderNumberLabel.topAnchor.constraint(equalTo: contentView.safeAreaLayoutGuide.topAnchor, constant: 25),
             orderNumberLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
             
             clientNameLabel.topAnchor.constraint(equalTo: orderNumberLabel.topAnchor, constant: 35),
             clientNameLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
             
             usernameField.topAnchor.constraint(equalTo: clientNameLabel.bottomAnchor, constant: 5),
-            usernameField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            usernameField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            usernameField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+            usernameField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             
             orderTotalPriceLabel.topAnchor.constraint(equalTo: usernameField.bottomAnchor, constant: 15),
             orderTotalPriceLabel.leadingAnchor.constraint(equalTo: usernameField.leadingAnchor, constant: 3),
@@ -234,13 +282,35 @@ class OrderDetailViewController: UIViewController {
 
             
             saveButton.topAnchor.constraint(equalTo: descriptionTextView.bottomAnchor, constant: 20),
-            saveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            saveButton.widthAnchor.constraint(equalToConstant: 200),
+            saveButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 40),
+            saveButton.widthAnchor.constraint(equalToConstant: 150),
             saveButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            deleteButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
-            deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+
+            deleteButton.centerYAnchor.constraint(equalTo: saveButton.centerYAnchor),
+            deleteButton.leadingAnchor.constraint(equalTo: saveButton.trailingAnchor, constant: 30),
+            deleteButton.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -40),
+            deleteButton.widthAnchor.constraint(equalToConstant: 150),
+            deleteButton.heightAnchor.constraint(equalTo: saveButton.heightAnchor),
         ])
+        
+        contentView.bottomAnchor.constraint(equalTo: saveButton.bottomAnchor, constant: 30).isActive = true
+
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardFrame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            scrollView.contentInset.bottom = keyboardFrame.height
+            scrollView.verticalScrollIndicatorInsets.bottom = keyboardFrame.height
+        }
+    }
+
+    @objc func keyboardWillHide(notification: NSNotification) {
+        scrollView.contentInset.bottom = 0
+        scrollView.verticalScrollIndicatorInsets.bottom = 0
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     func makeLabel(withText text: String, fontSize: CGFloat = 14, textColor: UIColor = .gray) -> UILabel {
@@ -297,6 +367,9 @@ class OrderDetailViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { [weak self] _ in
             guard let self = self else { return }
             self.delegate?.deleteOrder(at: self.indexInMonth, month: self.monthName)
+            NotificationCenter.default.post(name: .orderDeleted, object: nil, userInfo: ["clientName": self.order.clientName])
+
+            
             self.navigationController?.popViewController(animated: true)
         }))
         
@@ -304,4 +377,8 @@ class OrderDetailViewController: UIViewController {
     }
 
     
+}
+
+extension Notification.Name {
+    static let orderDeleted = Notification.Name("orderDeleted")
 }

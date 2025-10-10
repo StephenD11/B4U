@@ -43,7 +43,16 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
         sb.searchBarStyle = .minimal
         
         if let textField = sb.value(forKey: "searchField") as? UITextField {
-            textField.backgroundColor = .white
+            textField.backgroundColor = UIColor { traitCollection in
+                traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+            }
+            textField.textColor = .label
+            if let placeholder = textField.placeholder {
+                textField.attributedPlaceholder = NSAttributedString(
+                    string: placeholder,
+                    attributes: [.foregroundColor: UIColor.secondaryLabel]
+                )
+            }
             textField.layer.cornerRadius = 10
             textField.clipsToBounds = true
         }
@@ -68,7 +77,7 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         title = "Orders"
 
         loadOrders()
@@ -181,6 +190,8 @@ class OrdersViewController: UIViewController, NewOrderDelegate{
 extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        
         let month = activeMonths[indexPath.section]
 
         guard let orders = ordersByMonth[month], indexPath.row < orders.count else { return }
@@ -189,7 +200,7 @@ extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
 
         let detailVC = OrderDetailViewController(order: order)
         detailVC.delegate = self
-        detailVC.incomeDelegate = calculationsVC   
+        detailVC.incomeDelegate = calculationsVC
         detailVC.monthName = month
         detailVC.indexInMonth = indexPath.row
         detailVC.orderNumber = globalOrderNumber(for: indexPath)
@@ -241,6 +252,12 @@ extension OrdersViewController: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.numberOfLines = 1
         cell.textLabel?.lineBreakMode = .byTruncatingTail
         cell.textLabel?.attributedText = attributedText
+        
+        cell.backgroundColor = .secondarySystemBackground
+        cell.textLabel?.textColor = .label
+        cell.contentView.layer.cornerRadius = 12
+        cell.contentView.clipsToBounds = true
+        cell.backgroundColor = .clear
         
         return cell
     }

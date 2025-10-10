@@ -53,6 +53,14 @@ class ProfileViewController: UIViewController {
         tf.borderStyle = .roundedRect
         tf.autocapitalizationType = .none
         tf.text = UserManager.shared.currentUser?.username
+        tf.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+        }
+        
+        tf.textColor = .label
+            tf.attributedPlaceholder = NSAttributedString(string: tf.placeholder ?? "",
+                attributes: [.foregroundColor: UIColor.secondaryLabel]
+            )
         return tf
     }()
     
@@ -63,6 +71,14 @@ class ProfileViewController: UIViewController {
         tf.borderStyle = .roundedRect
         tf.autocapitalizationType = .none
         tf.text = UserManager.shared.currentUser?.company
+        tf.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+        }
+        
+        tf.textColor = .label
+            tf.attributedPlaceholder = NSAttributedString(string: tf.placeholder ?? "",
+                attributes: [.foregroundColor: UIColor.secondaryLabel]
+            )
         return tf
     }()
     
@@ -75,6 +91,14 @@ class ProfileViewController: UIViewController {
         
         tf.autocapitalizationType = .none
         tf.text = UserManager.shared.currentUser?.pin
+        tf.backgroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.secondarySystemBackground : UIColor.white
+        }
+        
+        tf.textColor = .label
+            tf.attributedPlaceholder = NSAttributedString(string: tf.placeholder ?? "",
+                attributes: [.foregroundColor: UIColor.secondaryLabel]
+            )
         return tf
     }()
     
@@ -101,10 +125,13 @@ class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         title = "Profile"
         
         setupUI()
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
         
         pinField.keyboardType = .numberPad
         pinField.addTarget(self, action: #selector(limitPin), for: .editingChanged)
@@ -149,6 +176,9 @@ class ProfileViewController: UIViewController {
 
     }
     
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
     
     @objc func buttonTouchDown(_ sender: UIButton) {
         sender.alpha = 0.6 //

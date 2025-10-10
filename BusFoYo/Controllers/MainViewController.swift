@@ -41,7 +41,12 @@ class MainViewController: UIViewController {
     func createBottomButton(title: String) -> UIButton {
         let btn = UIButton(type: .system)
         btn.setTitle(title, for: .normal)
-        btn.setTitleColor(.black, for: .normal)
+        let normalColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.lightGray : UIColor.darkGray
+        }
+        btn.setTitleColor(normalColor, for: .normal)
+        btn.setTitleColor(.orange, for: .highlighted)
+        btn.tintColor = .clear
         btn.titleLabel?.font = .systemFont(ofSize: 15)
         btn.layer.cornerRadius = 12
         btn.translatesAutoresizingMaskIntoConstraints = false
@@ -72,14 +77,24 @@ class MainViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        view.backgroundColor = .systemBackground
         setupUI()
         
         profileButton.addTarget(self, action: #selector(profileTapped), for: .touchUpInside)
         ordersButton.addTarget(self, action: #selector(ordersTapped), for: .touchUpInside)
         calculationsButton.addTarget(self, action: #selector(calculationsTapped), for: .touchUpInside)
         
+        
+        let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+        swipeLeft.direction = .left
+        view.addGestureRecognizer(swipeLeft)
+
+        let swipeRight = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
+        swipeRight.direction = .right
+        view.addGestureRecognizer(swipeRight)
+
         centerImageView.isUserInteractionEnabled = true
+        
         
     }
     
@@ -113,18 +128,30 @@ class MainViewController: UIViewController {
     }
     
     @objc func profileTapped() {
-        changeCenterImage(to: images[0], selected: profileButton)
+        let buttons = [profileButton, ordersButton, calculationsButton]
+        let currentIndex = buttons.firstIndex(of: selectedButton ?? profileButton) ?? 0
+        let targetIndex = 0
+        let swipeDirection: UISwipeGestureRecognizer.Direction = targetIndex > currentIndex ? .left : .right
+        changeCenterImage(to: images[0], selected: profileButton, swipeDirection: swipeDirection)
     }
     
     @objc func ordersTapped() {
-        changeCenterImage(to: images[1], selected: ordersButton)
+        let buttons = [profileButton, ordersButton, calculationsButton]
+        let currentIndex = buttons.firstIndex(of: selectedButton ?? profileButton) ?? 0
+        let targetIndex = 1
+        let swipeDirection: UISwipeGestureRecognizer.Direction = targetIndex > currentIndex ? .left : .right
+        changeCenterImage(to: images[1], selected: ordersButton, swipeDirection: swipeDirection)
     }
     
     @objc func calculationsTapped() {
-        changeCenterImage(to: images[2], selected: calculationsButton)
+        let buttons = [profileButton, ordersButton, calculationsButton]
+        let currentIndex = buttons.firstIndex(of: selectedButton ?? profileButton) ?? 0
+        let targetIndex = 2
+        let swipeDirection: UISwipeGestureRecognizer.Direction = targetIndex > currentIndex ? .left : .right
+        changeCenterImage(to: images[2], selected: calculationsButton, swipeDirection: swipeDirection)
     }
     
-    func changeCenterImage(to imageName: String, selected button: UIButton) {
+    func changeCenterImage(to imageName: String, selected button: UIButton, swipeDirection: UISwipeGestureRecognizer.Direction) {
         guard selectedButton !== button else { return }
         guard !isAnimating else { return }
         isAnimating = true
@@ -178,14 +205,16 @@ class MainViewController: UIViewController {
             imageActionButton.heightAnchor.constraint(equalToConstant: 28),
         ])
 
-        newImageView.transform = CGAffineTransform(translationX: view.frame.width, y: 0)
-        imageActionButton.transform = CGAffineTransform(translationX: view.frame.width, y: 0)
+        let translationX = swipeDirection == .left ? view.frame.width : -view.frame.width
+
+        newImageView.transform = CGAffineTransform(translationX: translationX, y: 0)
+        imageActionButton.transform = CGAffineTransform(translationX: translationX, y: 0)
 
         view.layoutIfNeeded()
 
         UIView.animate(withDuration: 0.4, animations: {
-            oldImageView.transform = CGAffineTransform(translationX: -self.view.frame.width, y: 0)
-            oldButton?.transform = CGAffineTransform(translationX: -self.view.frame.width, y: 0)
+            oldImageView.transform = CGAffineTransform(translationX: -translationX, y: 0)
+            oldButton?.transform = CGAffineTransform(translationX: -translationX, y: 0)
             newImageView.transform = .identity
             imageActionButton.transform = .identity
         }, completion: { _ in
@@ -202,6 +231,13 @@ class MainViewController: UIViewController {
             self.selectedButton?.transform = .identity
             button.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
         }
+        
+        let normalColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? UIColor.lightGray : UIColor.darkGray
+        }
+
+        self.selectedButton?.setTitleColor(normalColor, for: .normal) 
+        button.setTitleColor(.orange, for: .normal)
 
         selectedButton = button
     }
@@ -223,6 +259,36 @@ class MainViewController: UIViewController {
             }
         
         
+    }
+    
+    @objc func handleSwipe(_ gesture: UISwipeGestureRecognizer) {
+        guard !isAnimating else { return }
+
+        let buttons = [profileButton, ordersButton, calculationsButton]
+        guard let currentButton = selectedButton,
+              let currentIndex = buttons.firstIndex(of: currentButton) else { return }
+
+        var nextIndex: Int
+        if gesture.direction == .left {
+            nextIndex = min(currentIndex + 1, buttons.count - 1)
+        } else {
+            nextIndex = max(currentIndex - 1, 0)
+        }
+
+        let nextButton = buttons[nextIndex]
+        let nextImageName: String
+        switch nextButton {
+        case profileButton:
+            nextImageName = "profileImage"
+        case ordersButton:
+            nextImageName = "ordersImage"
+        case calculationsButton:
+            nextImageName = "calculationsImage"
+        default:
+            return
+        }
+
+        changeCenterImage(to: nextImageName, selected: nextButton, swipeDirection: gesture.direction)
     }
     
 }
