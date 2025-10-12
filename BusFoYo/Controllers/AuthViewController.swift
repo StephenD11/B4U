@@ -42,8 +42,8 @@ class AuthViewController: UIViewController {
               !username.isEmpty,
               let company = authView.companyTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
               !company.isEmpty else {
-            let alert = UIAlertController(title: "Wrong", message: "Please fill all the fields 🚩", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default))
+            let alert = UIAlertController(title: "Something's wrong 😬", message: "Please fill all the fields", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Let me try again", style: .default))
             present(alert, animated: true)
             return
         }
@@ -51,7 +51,7 @@ class AuthViewController: UIViewController {
         if UserManager.shared.currentUser == nil {
             guard let pin = authView.pinTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !pin.isEmpty else {
-                let alert = UIAlertController(title: "Wrong", message: "Please enter a PIN 🚩", preferredStyle: .alert)
+                let alert = UIAlertController(title: "OOPS 😬", message: "You forgot to add a PIN code", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "Ok", style: .default))
                 present(alert, animated: true)
                 return
@@ -65,8 +65,8 @@ class AuthViewController: UIViewController {
     }
     
     @objc func showHint() {
-        let alert = UIAlertController(title: "Notice", message: "PIN must contain 4 numbers 🙋‍♂️", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default))
+        let alert = UIAlertController(title: "Notice 🔐", message: "PIN must contain 4 numbers", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Understood", style: .default))
         present(alert, animated: true)
         
     }   

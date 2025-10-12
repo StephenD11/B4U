@@ -20,6 +20,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let splashVC = SplashViewController()
 
         let navController = UINavigationController(rootViewController: splashVC)
+        
+        
+        
+        window.overrideUserInterfaceStyle = .light
 
         window.rootViewController = navController
 

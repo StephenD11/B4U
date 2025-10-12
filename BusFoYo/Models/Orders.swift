@@ -9,6 +9,7 @@ import Foundation
 
 struct Order: Codable, Identifiable{
     let id: UUID
+    var oldName: String?
     var clientName: String
     var totalPrice: String?
     var orderDate: Date

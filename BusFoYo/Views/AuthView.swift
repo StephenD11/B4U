@@ -9,10 +9,20 @@ import UIKit
 
 class AuthView: UIView {
     
+    
+    lazy var registrationLabel: UILabel = {
+        let lb = UILabel()
+        lb.translatesAutoresizingMaskIntoConstraints = false
+        lb.text = "REGISTRATION"
+        lb.textColor = .black
+        lb.font = .boldSystemFont(ofSize: 22)
+        return lb
+    }()
+    
     lazy var usernameTextField: UITextField = {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Username"
+        tf.placeholder = "Your username"
         tf.borderStyle = .roundedRect
         tf.autocapitalizationType = .none
         tf.returnKeyType = .next
@@ -31,7 +41,7 @@ class AuthView: UIView {
     lazy var companyTextField: UITextField = {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Company Name"
+        tf.placeholder = "Yout company name"
         tf.borderStyle = .roundedRect
         tf.autocapitalizationType = .words
         tf.returnKeyType = .next
@@ -85,7 +95,7 @@ class AuthView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .systemBackground 
+        backgroundColor = .systemBackground
         setupUI()
         
         pinTextField.keyboardType = .numberPad
@@ -99,29 +109,35 @@ class AuthView: UIView {
     
     
     private func setupUI() {
-        addSubview(usernameTextField)
-        addSubview(companyTextField)
-        addSubview(pinTextField)
-        addSubview(enterButton)
+        let stackView = UIStackView(arrangedSubviews: [
+            registrationLabel,
+            usernameTextField,
+            companyTextField,
+            pinTextField,
+            enterButton
+        ])
+        stackView.axis = .vertical
+        stackView.alignment = .center
+        stackView.spacing = 20
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(stackView)
 
         NSLayoutConstraint.activate([
-            usernameTextField.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 100),
-            usernameTextField.centerXAnchor.constraint(equalTo: centerXAnchor),
-            usernameTextField.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.8),
+            stackView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            stackView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            stackView.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 0.8),
+
+            usernameTextField.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             usernameTextField.heightAnchor.constraint(equalToConstant: 44),
 
-            companyTextField.topAnchor.constraint(equalTo: usernameTextField.bottomAnchor, constant: 20),
-            companyTextField.centerXAnchor.constraint(equalTo: usernameTextField.centerXAnchor),
-            companyTextField.widthAnchor.constraint(equalTo: usernameTextField.widthAnchor),
+            companyTextField.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             companyTextField.heightAnchor.constraint(equalToConstant: 44),
-            
-            pinTextField.topAnchor.constraint(equalTo: companyTextField.bottomAnchor, constant: 20),
-            pinTextField.centerXAnchor.constraint(equalTo: usernameTextField.centerXAnchor),
-            pinTextField.widthAnchor.constraint(equalTo: usernameTextField.widthAnchor),
+
+            pinTextField.widthAnchor.constraint(equalTo: stackView.widthAnchor),
             pinTextField.heightAnchor.constraint(equalToConstant: 44),
 
-            enterButton.topAnchor.constraint(equalTo: pinTextField.bottomAnchor, constant: 30),
-            enterButton.centerXAnchor.constraint(equalTo: centerXAnchor)
+            enterButton.heightAnchor.constraint(equalToConstant: 44)
         ])
     }
 

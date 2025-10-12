@@ -67,6 +67,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
         loadIncomes()
         setupUI()
         updateTotals()
+        updateEmptyState()
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleNewOrder(_:)), name: .newOrderAdded, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleOrderDeleted(_:)), name: .orderDeleted, object: nil)
@@ -108,7 +109,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
             incomeTableView.topAnchor.constraint(equalTo: incomeHeaderLabel.bottomAnchor, constant: 5),
             incomeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             incomeTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            incomeTableView.heightAnchor.constraint(equalToConstant: 200),
+            incomeTableView.heightAnchor.constraint(equalToConstant: 230),
 
             totalIncomeLabel.topAnchor.constraint(equalTo: incomeTableView.bottomAnchor, constant: 15),
             totalIncomeLabel.leadingAnchor.constraint(equalTo: incomeTableView.leadingAnchor),
@@ -121,7 +122,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
             expenseTableView.topAnchor.constraint(equalTo: expenseHeaderLabel.bottomAnchor, constant: 5),
             expenseTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             expenseTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            expenseTableView.heightAnchor.constraint(equalToConstant: 200),
+            expenseTableView.heightAnchor.constraint(equalToConstant: 230),
 
             totalExpenseLabel.topAnchor.constraint(equalTo: expenseTableView.bottomAnchor, constant: 15),
             totalExpenseLabel.leadingAnchor.constraint(equalTo: expenseTableView.leadingAnchor),
@@ -143,6 +144,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
             saveIncomes()
             incomeTableView.reloadData()
             updateTotals()
+            updateEmptyState()
         }
     }
     
@@ -156,8 +158,8 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
     }
     
     @objc func addExpense() {
-        let alert = UIAlertController(title: "New Expense", message: "Enter name and amount", preferredStyle: .alert)
-        alert.addTextField { $0.placeholder = "Name" }
+        let alert = UIAlertController(title: "📌 New Expense 📌", message: "enter name and amount", preferredStyle: .alert)
+        alert.addTextField { $0.placeholder = "Expense" }
         alert.addTextField { tf in
             tf.placeholder = "Amount"
             tf.keyboardType = .decimalPad
@@ -171,6 +173,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
             self.saveExpenses()
             self.expenseTableView.reloadData()
             self.updateTotals()
+            self.updateEmptyState()
         }))
         present(alert, animated: true)
     }
@@ -224,8 +227,11 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
         addIncome(income)
     }
     
-    func addIncome(_ income: Income) {
-        if let index = incomes.firstIndex(where: { $0.clientName == income.clientName }) {
+    func addIncome(_ income: Income, oldName: String? = nil) {
+        if let oldName = oldName,
+           let index = incomes.firstIndex(where: { $0.clientName == oldName }) {
+            incomes[index] = income
+        } else if let index = incomes.firstIndex(where: { $0.clientName == income.clientName }) {
             incomes[index] = income
         } else {
             incomes.append(income)
@@ -233,8 +239,44 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
         saveIncomes()
         incomeTableView.reloadData()
         updateTotals()
+        updateEmptyState()
+    }
+
+    func removeIncome(forClientName clientName: String) {
+        if let index = incomes.firstIndex(where: { $0.clientName == clientName }) {
+            incomes.remove(at: index)
+            saveIncomes()
+            incomeTableView.reloadData()
+            updateTotals()
+            updateEmptyState()
+        }
     }
     
+    func updateEmptyState() {
+        // Для таблицы доходов
+        if incomes.isEmpty {
+            let label = UILabel(frame: incomeTableView.bounds)
+            label.text = "There are no records yet"
+            label.textAlignment = .center
+            label.textColor = .secondaryLabel
+            label.font = UIFont.systemFont(ofSize: 14)
+            incomeTableView.backgroundView = label
+        } else {
+            incomeTableView.backgroundView = nil
+        }
+        
+        // Для таблицы расходов
+        if expenses.isEmpty {
+            let label = UILabel(frame: expenseTableView.bounds)
+            label.text = "There are no records yet"
+            label.textAlignment = .center
+            label.textColor = .secondaryLabel
+            label.font = UIFont.systemFont(ofSize: 14)
+            expenseTableView.backgroundView = label
+        } else {
+            expenseTableView.backgroundView = nil
+        }
+    }
 }
 
 extension CalculationsViewController: UITableViewDataSource, UITableViewDelegate {
@@ -282,11 +324,13 @@ extension CalculationsViewController: UITableViewDataSource, UITableViewDelegate
                 saveExpenses()
                 tableView.deleteRows(at: [indexPath], with: .fade)
                 updateTotals()
+                updateEmptyState()
             } else if tableView == incomeTableView {
                 incomes.remove(at: indexPath.row)
                 saveIncomes()
                 tableView.deleteRows(at: [indexPath], with: .fade)
                 updateTotals()
+                updateEmptyState()
             }
             
         }

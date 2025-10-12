@@ -13,7 +13,9 @@ protocol NewOrderDelegate: AnyObject {
 }
 
 protocol NewOrderIncomeDelegate: AnyObject {
-    func addIncome(_ income: Income)
+    func addIncome(_ income: Income, oldName: String?)
+    func removeIncome(forClientName clientName: String)
+
 }
 
 class NewOrderViewController: UIViewController {
@@ -45,7 +47,6 @@ class NewOrderViewController: UIViewController {
     lazy var amountField: UITextField = {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Age"
         tf.borderStyle = .roundedRect
         tf.placeholder = "00.00"
         tf.keyboardType = .numberPad
@@ -146,7 +147,7 @@ class NewOrderViewController: UIViewController {
         let scroll = UIScrollView()
         scroll.translatesAutoresizingMaskIntoConstraints = false
         scroll.alwaysBounceVertical = true
-        scroll.contentInsetAdjustmentBehavior = .never 
+        scroll.contentInsetAdjustmentBehavior = .never
         return scroll
     }()
 
@@ -166,12 +167,13 @@ class NewOrderViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = "New Order"
-        
-        
-        
+
+        // Назначаем делегат для descriptionTextView
+        descriptionTextView.delegate = self
+
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(keyboardWillShow),
@@ -185,7 +187,7 @@ class NewOrderViewController: UIViewController {
             name: UIResponder.keyboardWillHideNotification,
             object: nil
         )
-        
+
         setupUI()
     }
     
@@ -304,8 +306,13 @@ class NewOrderViewController: UIViewController {
     
     @objc func keyboardWillShow(notification: NSNotification) {
         if let keyboardFrame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            scrollView.contentInset.bottom = keyboardFrame.height
-            scrollView.verticalScrollIndicatorInsets.bottom = keyboardFrame.height
+            scrollView.contentInset.bottom = keyboardFrame.height + 20
+            scrollView.verticalScrollIndicatorInsets.bottom = keyboardFrame.height + 20
+
+            if descriptionTextView.isFirstResponder {
+                let rect = descriptionTextView.convert(descriptionTextView.bounds, to: scrollView)
+                scrollView.scrollRectToVisible(rect, animated: true)
+            }
         }
     }
 
@@ -331,7 +338,7 @@ class NewOrderViewController: UIViewController {
         guard let username  = usernameField.text, !username.isEmpty,
               let amountText = amountField.text, let amount = Int(amountText),
               !amountText.isEmpty else {
-            let alert = UIAlertController(title: "Error", message: "Fill all required fields", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Oops 😬", message: "Fill all required fields", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Ok", style: .default))
             present(alert, animated: true)
             return
@@ -356,7 +363,7 @@ class NewOrderViewController: UIViewController {
 
         if let priceString = newOrder.totalPrice, let totalPrice = Double(priceString) {
             let income = Income(clientName: newOrder.clientName, totalPrice: totalPrice)
-            incomeDelegate?.addIncome(income)
+            incomeDelegate?.addIncome(income, oldName: nil)
         }
 
         delegate?.addOrder(newOrder)
@@ -364,5 +371,14 @@ class NewOrderViewController: UIViewController {
         NotificationCenter.default.post(name: .newOrderAdded, object: nil, userInfo: ["order": newOrder])
 
         navigationController?.popViewController(animated:true)
+    }
+}
+
+extension NewOrderViewController: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        DispatchQueue.main.async {
+            let rect = textView.convert(textView.bounds, to: self.scrollView)
+            self.scrollView.scrollRectToVisible(rect, animated: true)
+        }
     }
 }

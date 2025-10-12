@@ -63,9 +63,50 @@ class MainViewController: UIViewController {
         return btn
     }()
     
-    lazy var profileButton: UIButton = createBottomButton(title: "PROFILE")
-    lazy var ordersButton: UIButton = createBottomButton(title: "ORDERS")
-    lazy var calculationsButton: UIButton = createBottomButton(title: "CASH")
+    lazy var profileButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "person.crop.circle")?.withConfiguration(UIImage.SymbolConfiguration(pointSize: 17, weight: .medium))
+        config.imagePlacement = .top
+        config.imagePadding = 5
+        config.baseForegroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? .lightGray : .darkGray
+        }
+
+        let btn = UIButton(configuration: config)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.addTarget(self, action: #selector(profileTapped), for: .touchUpInside)
+        return btn
+    }()
+
+    lazy var ordersButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "doc.text")?.withConfiguration(UIImage.SymbolConfiguration(pointSize: 17, weight: .medium))
+        config.imagePlacement = .top
+        config.imagePadding = 5
+        config.baseForegroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? .lightGray : .darkGray
+        }
+
+        let btn = UIButton(configuration: config)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.addTarget(self, action: #selector(ordersTapped), for: .touchUpInside)
+        return btn
+    }()
+
+    lazy var calculationsButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        config.image = UIImage(systemName: "dollarsign.circle")?.withConfiguration(UIImage.SymbolConfiguration(pointSize: 17, weight: .medium))
+        config.imagePlacement = .top
+        config.imagePadding = 5
+        config.baseForegroundColor = UIColor { traitCollection in
+            traitCollection.userInterfaceStyle == .dark ? .lightGray : .darkGray
+        }
+
+        let btn = UIButton(configuration: config)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.addTarget(self, action: #selector(calculationsTapped), for: .touchUpInside)
+        return btn
+    }()
     
  
     
@@ -79,10 +120,6 @@ class MainViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         setupUI()
-        
-        profileButton.addTarget(self, action: #selector(profileTapped), for: .touchUpInside)
-        ordersButton.addTarget(self, action: #selector(ordersTapped), for: .touchUpInside)
-        calculationsButton.addTarget(self, action: #selector(calculationsTapped), for: .touchUpInside)
         
         
         let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
@@ -156,6 +193,16 @@ class MainViewController: UIViewController {
         guard !isAnimating else { return }
         isAnimating = true
 
+        let buttons = [self.profileButton, self.ordersButton, self.calculationsButton]
+
+        for btn in buttons {
+            btn.configuration?.baseForegroundColor = (btn == button) ? .orange : UIColor { traitCollection in
+                traitCollection.userInterfaceStyle == .dark ? .lightGray : .darkGray
+            }
+        }
+
+        self.selectedButton = button
+
         let oldImageView = self.centerImageView
 
         let oldButton = view.viewWithTag(999)
@@ -224,22 +271,15 @@ class MainViewController: UIViewController {
             self.isAnimating = false
         })
 
-        self.selectedButton?.setTitleColor(.black, for: .normal)
-        button.setTitleColor(.orange, for: .normal)
-
         UIView.animate(withDuration: 0.3) {
-            self.selectedButton?.transform = .identity
-            button.transform = CGAffineTransform(scaleX: 1.3, y: 1.3)
+            for btn in [self.profileButton, self.ordersButton, self.calculationsButton] {
+                if btn != button {
+                    btn.transform = .identity
+                }
+            }
+            button.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
         }
         
-        let normalColor = UIColor { traitCollection in
-            traitCollection.userInterfaceStyle == .dark ? UIColor.lightGray : UIColor.darkGray
-        }
-
-        self.selectedButton?.setTitleColor(normalColor, for: .normal) 
-        button.setTitleColor(.orange, for: .normal)
-
-        selectedButton = button
     }
 
     @objc func imageButtonTapped(_ sender: UIButton) {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FD7208F22E9945BA0036786E /* Hero in Frameworks */ = {isa = PBXBuildFile; productRef = FD7208F12E9945BA0036786E /* Hero */; };
 		FD95554C2E8881690027C75D /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = FD95554B2E8881690027C75D /* Lottie */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD7208F22E9945BA0036786E /* Hero in Frameworks */,
 				FD95554C2E8881690027C75D /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +86,7 @@
 			name = BusFoYo;
 			packageProductDependencies = (
 				FD95554B2E8881690027C75D /* Lottie */,
+				FD7208F12E9945BA0036786E /* Hero */,
 			);
 			productName = BusFoYo;
 			productReference = FD9555302E8880B00027C75D /* BusFoYo.app */;
@@ -115,6 +118,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				FD95554A2E8881690027C75D /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				FD7208F02E9945BA0036786E /* XCRemoteSwiftPackageReference "Hero" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FD9555312E8880B00027C75D /* Products */;
@@ -346,6 +350,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		FD7208F02E9945BA0036786E /* XCRemoteSwiftPackageReference "Hero" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/HeroTransitions/Hero.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.4;
+			};
+		};
 		FD95554A2E8881690027C75D /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-ios";
@@ -357,6 +369,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FD7208F12E9945BA0036786E /* Hero */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FD7208F02E9945BA0036786E /* XCRemoteSwiftPackageReference "Hero" */;
+			productName = Hero;
+		};
 		FD95554B2E8881690027C75D /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = FD95554A2E8881690027C75D /* XCRemoteSwiftPackageReference "lottie-ios" */;

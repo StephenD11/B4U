@@ -125,6 +125,7 @@ class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = .systemBackground
         title = "Profile"
         
@@ -137,6 +138,9 @@ class ProfileViewController: UIViewController {
         pinField.addTarget(self, action: #selector(limitPin), for: .editingChanged)
     }
     
+    @objc func backTapped() {
+        navigationController?.popViewController(animated: true)
+    }
     
     func setupUI() {
         
@@ -197,7 +201,7 @@ class ProfileViewController: UIViewController {
               !company.isEmpty,
               let pin = pinField.text?.trimmingCharacters(in: .whitespaces),
               !pin.isEmpty else {
-            let alert = UIAlertController(title: "Wrong", message: "Please fill all fields 😒", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Oops 😬", message: "Please fill all the fields", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Ok", style: .default))
             present(alert, animated: true)
             return
@@ -208,21 +212,34 @@ class ProfileViewController: UIViewController {
            company == currentUser.company &&
            pin == currentUser.pin {
             
-            let alert = UIAlertController(title: "Notice", message: "No change detected 🤷‍♂️", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Ok", style: .default))
+            let alert = UIAlertController(title: "Notice", message: "No change detected 😶‍🌫️", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Try again", style: .default))
             present(alert, animated: true)
             return
         }
         
+        let oldUsername = UserManager.shared.currentUser?.username
         
         let updateUser = User(username: username, company: company, pin: pin)
         UserManager.shared.saveUser(updateUser)
         
-        let alert = UIAlertController(title: "Success ✅", message: "Profile Updated", preferredStyle: .alert)
+        if let oldUsername = oldUsername, oldUsername != username {
+            let oldKey = "allOrders_\(oldUsername)"
+            let newKey = "allOrders_\(username)"
+            
+            if let oldData = UserDefaults.standard.data(forKey: oldKey) {
+                UserDefaults.standard.set(oldData, forKey: newKey)
+                UserDefaults.standard.removeObject(forKey: oldKey)
+                print("✅ Orders moved from \(oldKey) → \(newKey)")
+            } else {
+                print("⚠️ No data found for \(oldKey)")
+            }
+        }
         
-        let mainVC = MainViewController()
+        let alert = UIAlertController(title: "Profile Updated ✅", message: "", preferredStyle: .alert)
+        
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { [weak self] _ in
-            self?.navigationController?.setViewControllers([mainVC], animated: true)
+            self?.navigationController?.popViewController(animated: true)
         }))
         present(alert,animated: true)
         

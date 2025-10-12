@@ -11,3 +11,9 @@ import UIKit
 extension Notification.Name {
     static let newOrderAdded = Notification.Name("newOrderAdded")
 }
+
+extension UIViewController {
+    func applyAppBackgroundColor() {
+        view.backgroundColor = UIColor(red: 0.9, green: 0.95, blue: 1.0, alpha: 1.0)
+    }
+}

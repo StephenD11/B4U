@@ -12,7 +12,7 @@ class PinCodeViewController: UIViewController {
     lazy var pinTextField: UITextField = {
         let tf = UITextField()
         tf.translatesAutoresizingMaskIntoConstraints = false
-        tf.placeholder = "Enter your PIN"
+        tf.placeholder = "Your PIN"
         tf.borderStyle = .roundedRect
         tf.keyboardType = .numberPad
         
@@ -34,7 +34,7 @@ class PinCodeViewController: UIViewController {
     lazy var forgotPinButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("Forgot PIN", for: .normal)
+        btn.setTitle("Forgot PIN code", for: .normal)
         btn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         btn.setTitleColor(.systemRed, for: .normal)
         btn.addTarget(self, action: #selector(forgotPinTapped), for: .touchUpInside)
@@ -44,7 +44,7 @@ class PinCodeViewController: UIViewController {
     lazy var enterButton: UIButton = {
         let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("Enter", for: .normal)
+        btn.setTitle("Go", for: .normal)
         btn.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         btn.addTarget(self, action: #selector(enterTapped), for: .touchUpInside)
         return btn
@@ -52,6 +52,7 @@ class PinCodeViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = .systemBackground
         setupUI()
         
@@ -93,7 +94,7 @@ class PinCodeViewController: UIViewController {
         view.endEditing(true)
 
         guard let enteredPin = pinTextField.text, !enteredPin.isEmpty else {
-            showAlert(message: "You wrote wrong pin")
+            showAlert(message: "the password is incorrect, please try again")
             return
         }
 
@@ -106,18 +107,18 @@ class PinCodeViewController: UIViewController {
             let mainVC = MainViewController()
             navigationController?.setViewControllers([mainVC], animated: true)
         } else {
-            showAlert(message: "Please, try again")
+            showAlert(message: "wrong PIN code, try again")
         }
     }
 
     func showAlert(message: String) {
-        let alert = UIAlertController(title: "Wrong 🚫", message: message, preferredStyle: .alert)
+        let alert = UIAlertController(title: "Oops 😬 ", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
     }
     
     @objc func forgotPinTapped() {
-        let alert = UIAlertController(title: "Recover", message: "To restore the pin, you need to enter your account login 🫣", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Password Recovery 🔐", message: "Enter your username to the field", preferredStyle: .alert)
         
         alert.addTextField { textField in
             textField.placeholder = "Username"
@@ -126,7 +127,7 @@ class PinCodeViewController: UIViewController {
         
         alert.addAction(UIAlertAction(title: "Cancle", style: .cancel))
         
-        alert.addAction(UIAlertAction(title: "Enter", style: .default, handler: { [weak self] _ in
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { [weak self] _ in
             guard let username = alert.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines),
                   !username.isEmpty else {
                 self?.showAlert(message: "The field can't be empty")
@@ -134,18 +135,18 @@ class PinCodeViewController: UIViewController {
             }
             
             guard let user = UserManager.shared.currentUser, user.username.lowercased() == username.lowercased() || user.username == username else {
-                self?.showAlert(message: "No user found with this username")
+                self?.showAlert(message: "There is no such user in the database, try again")
                 return
             }
             
-            let pinAlert = UIAlertController(title: "Success ✅ ", message: "Your pin is: \(user.pin)", preferredStyle: .alert)
-            pinAlert.addAction(UIAlertAction(title: "OK", style: .default))
+            let pinAlert = UIAlertController(title: "Success ✅ ", message: "Your PIN: \(user.pin)", preferredStyle: .alert)
+            pinAlert.addAction(UIAlertAction(title: "Great", style: .default))
             self?.present(pinAlert, animated: true)
         }))
         
-        alert.addAction(UIAlertAction(title: "Remove Account", style: .destructive, handler: { _ in
+        alert.addAction(UIAlertAction(title: "Delete account", style: .destructive, handler: { _ in
             
-            let mainAlert = UIAlertController(title: "🚨 Warning 🚨 ", message: "All data will be deleted. Try to restore the PIN code. Are you sure you want to delete your account? ", preferredStyle: .alert)
+            let mainAlert = UIAlertController(title: "🚨 WARNING 🚨 ", message: "All data will be deleted. Are you sure you want to delete your account? ", preferredStyle: .alert)
             
             mainAlert.addAction(UIAlertAction(title: "No", style: .default))
             self.present(mainAlert, animated:true)

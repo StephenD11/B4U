@@ -171,6 +171,12 @@ class OrderDetailViewController: UIViewController {
         
         view.backgroundColor = .systemBackground
         title = "ℹ️ \(order.clientName)"
+        
+        order.oldName = order.clientName
+
+
+        descriptionTextView.delegate = self
+
         setupUI()
         populateFields()
     }
@@ -298,11 +304,19 @@ class OrderDetailViewController: UIViewController {
     }
     
     @objc func keyboardWillShow(notification: NSNotification) {
-        if let keyboardFrame = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
-            scrollView.contentInset.bottom = keyboardFrame.height
-            scrollView.verticalScrollIndicatorInsets.bottom = keyboardFrame.height
+        guard let userInfo = notification.userInfo,
+              let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return }
+        
+        let keyboardHeight = keyboardFrame.height
+        scrollView.contentInset.bottom = keyboardHeight + 20
+        scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight + 20
+        
+        if descriptionTextView.isFirstResponder {
+            let rect = descriptionTextView.convert(descriptionTextView.bounds, to: scrollView)
+            scrollView.scrollRectToVisible(rect, animated: true)
         }
     }
+
 
     @objc func keyboardWillHide(notification: NSNotification) {
         scrollView.contentInset.bottom = 0
@@ -334,32 +348,41 @@ class OrderDetailViewController: UIViewController {
     
     @objc func saveTapped() {
         guard let username = usernameField.text, !username.isEmpty, let amountText = amountFiled.text, !amountText.isEmpty else {
-            let alert = UIAlertController(title: "Error", message: "Please fill username and age", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Oops 😬", message: "Fill username and amount", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Ok", style: .default))
             present(alert, animated: true)
             return
     }
-        order.clientName = username
-        order.totalPrice = amountText
-        order.orderDate = orderDatePicker.date
-        order.deadline = deadlineDatePicker.date
-        order.isPaid = paidSwitch.isOn
-        order.description = descriptionTextView.text
-        order.phoneNumber = phoneField.text ?? ""
+        
+        if order.clientName != username {
+            order.oldName = order.clientName
+        }
+        
+        let updatedOrder = Order(
+            id: order.id,
+            oldName: order.oldName,
+            clientName: username,
+            totalPrice: amountText,
+            orderDate: orderDatePicker.date,
+            deadline: deadlineDatePicker.date,
+            isPaid: paidSwitch.isOn,
+            description: descriptionTextView.text,
+            phoneNumber: phoneField.text ?? ""
+        )
+        
+        delegate?.addOrder(updatedOrder)
         
         if let priceDouble = Double(amountText) {
                 let updatedIncome = Income(clientName: username, totalPrice: priceDouble)
-                incomeDelegate?.addIncome(updatedIncome)
-            }
-        
-        delegate?.addOrder(order)
-        
+            incomeDelegate?.addIncome(updatedIncome, oldName: order.oldName)
+        }
+
         navigationController?.popViewController(animated: true)
     }
     
     @objc func deleteTapped() {
-        let alert = UIAlertController(title: "Delete order",
-                                      message: "Are you sure you want to delete \(order.clientName)?",
+        let alert = UIAlertController(title: "Delete order 🤔",
+                                      message: "Are you sure you want to delete \(order.clientName)? ",
                                       preferredStyle: .alert)
         
         alert.addAction(UIAlertAction(title: "No", style: .cancel))
@@ -367,6 +390,7 @@ class OrderDetailViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { [weak self] _ in
             guard let self = self else { return }
             self.delegate?.deleteOrder(at: self.indexInMonth, month: self.monthName)
+            self.incomeDelegate?.removeIncome(forClientName: self.order.clientName)
             NotificationCenter.default.post(name: .orderDeleted, object: nil, userInfo: ["clientName": self.order.clientName])
 
             
@@ -381,4 +405,15 @@ class OrderDetailViewController: UIViewController {
 
 extension Notification.Name {
     static let orderDeleted = Notification.Name("orderDeleted")
+}
+
+
+
+extension OrderDetailViewController: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        DispatchQueue.main.async {
+            let rect = textView.convert(textView.bounds, to: self.scrollView)
+            self.scrollView.scrollRectToVisible(rect, animated: true)
+        }
+    }
 }
