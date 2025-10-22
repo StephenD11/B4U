@@ -9,8 +9,14 @@ import UIKit
 
 class ProfileViewController: UIViewController, UITextFieldDelegate {
     
-    let backgroundImageView = UIImageView(image: UIImage(named: "Background2"))
+    let backgroundImageView = UIImageView(image: UIImage(named: "Back_Lines"))
 
+    lazy var logoImageView: UIImageView = {
+        let iv = UIImageView(image: UIImage(named: "business-card-svgrepo-com"))
+        iv.contentMode = .scaleAspectFit
+        iv.translatesAutoresizingMaskIntoConstraints = false
+        return iv
+    }()
     
     lazy var usernameStack: UIStackView = {
         let label = UILabel()
@@ -131,14 +137,11 @@ class ProfileViewController: UIViewController, UITextFieldDelegate {
     }()
     
     lazy var deleteButton: UIButton = {
-       let btn = UIButton()
+        let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("", for: .normal)
-        btn.setImage(UIImage(named: "Button Delete light"), for: .normal)
-        btn.setImage(UIImage(named: "Button Delete dark"), for: .highlighted)
-        btn.imageView?.contentMode = .scaleAspectFit
-        btn.titleLabel?.font = UIFont.systemFont(ofSize:17)
+        btn.setTitle("Delete Account", for: .normal)
         btn.setTitleColor(.systemRed, for: .normal)
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         btn.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
         return btn
     }()
@@ -222,6 +225,7 @@ class ProfileViewController: UIViewController, UITextFieldDelegate {
     
     func setupUI() {
         
+        view.addSubview(logoImageView)
         
         let stack = UIStackView(arrangedSubviews: [
             usernameStack,
@@ -237,19 +241,24 @@ class ProfileViewController: UIViewController, UITextFieldDelegate {
         view.addSubview(deleteButton)
         
         NSLayoutConstraint.activate([
+            logoImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            logoImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -150),
+            logoImageView.widthAnchor.constraint(equalToConstant: 300),
+            logoImageView.heightAnchor.constraint(equalToConstant: 170),
+            
+            stack.topAnchor.constraint(equalTo: logoImageView.bottomAnchor, constant: 20),
             stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -40),
             stack.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
             
-            saveButton.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: 28),
+            saveButton.topAnchor.constraint(equalTo: stack.bottomAnchor, constant: 25),
             saveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            saveButton.widthAnchor.constraint(equalToConstant: 180),
-            saveButton.heightAnchor.constraint(equalToConstant:  32),
+            saveButton.widthAnchor.constraint(equalToConstant: 200),
+            saveButton.heightAnchor.constraint(equalToConstant:  35),
             
-            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -25),
             deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            deleteButton.widthAnchor.constraint(equalToConstant: 180),
-            deleteButton.heightAnchor.constraint(equalToConstant: 26),
+            deleteButton.widthAnchor.constraint(equalToConstant: 200),
+            deleteButton.heightAnchor.constraint(equalToConstant: 40),
             
         ])
         
@@ -305,7 +314,7 @@ class ProfileViewController: UIViewController, UITextFieldDelegate {
             }
         }
         
-        let alert = UIAlertController(title: "Profile Updated ✅", message: "", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Profile updated", message: "", preferredStyle: .alert)
         
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { [weak self] _ in
             self?.navigationController?.popViewController(animated: true)
@@ -317,7 +326,7 @@ class ProfileViewController: UIViewController, UITextFieldDelegate {
     @objc func deleteTapped() {
         guard let currentUser = UserManager.shared.currentUser else { return }
 
-        let alert = UIAlertController(title: "Delete Account", message: "Are you shure? 🤯", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Delete Account", message: "Are you shure?", preferredStyle: .alert)
         
         alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { _ in
             

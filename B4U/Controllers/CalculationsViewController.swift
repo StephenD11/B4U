@@ -15,7 +15,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
     var incomes: [Income] = []
     var expenses: [Expense] = []
     
-    let backgroundImageView = UIImageView(image: UIImage(named: "Background2"))
+    let backgroundImageView = UIImageView(image: UIImage(named: "Back_Lines"))
     
     
     lazy var totalIncomeLabel: UILabel = makeLabel(text: "Total Income: 0")
@@ -120,7 +120,7 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
             incomeHeaderAnimationView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -50),
             incomeHeaderAnimationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             incomeHeaderAnimationView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1.0),
-            incomeHeaderAnimationView.heightAnchor.constraint(equalToConstant: 150),
+            incomeHeaderAnimationView.heightAnchor.constraint(equalToConstant: 130),
 
             incomeTableView.topAnchor.constraint(equalTo: incomeHeaderAnimationView.bottomAnchor, constant: -50),
             incomeTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
@@ -130,20 +130,20 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
             totalIncomeLabel.topAnchor.constraint(equalTo: incomeTableView.bottomAnchor, constant: 15),
             totalIncomeLabel.leadingAnchor.constraint(equalTo: incomeTableView.leadingAnchor),
 
-            expensesHeaderAnimationView.topAnchor.constraint(equalTo: totalIncomeLabel.bottomAnchor, constant: -50),
+            expensesHeaderAnimationView.topAnchor.constraint(equalTo: totalIncomeLabel.bottomAnchor, constant: -40),
             expensesHeaderAnimationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             expensesHeaderAnimationView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1.0),
-            expensesHeaderAnimationView.heightAnchor.constraint(equalToConstant: 150),
+            expensesHeaderAnimationView.heightAnchor.constraint(equalToConstant: 130),
 
             expenseTableView.topAnchor.constraint(equalTo: expensesHeaderAnimationView.bottomAnchor, constant: -50),
             expenseTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             expenseTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             expenseTableView.heightAnchor.constraint(equalToConstant: 230),
 
-            totalExpenseLabel.topAnchor.constraint(equalTo: expenseTableView.bottomAnchor, constant: 15),
+            totalExpenseLabel.topAnchor.constraint(equalTo: expenseTableView.bottomAnchor, constant: 10),
             totalExpenseLabel.leadingAnchor.constraint(equalTo: expenseTableView.leadingAnchor),
 
-            totalLabel.topAnchor.constraint(equalTo: totalExpenseLabel.bottomAnchor, constant: 15),
+            totalLabel.topAnchor.constraint(equalTo: totalExpenseLabel.bottomAnchor, constant: 10),
             totalLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
         ])
     }

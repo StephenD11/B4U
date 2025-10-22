@@ -22,7 +22,7 @@ class NewOrderViewController: UIViewController {
     
     weak var incomeDelegate: NewOrderIncomeDelegate?
     
-    let backgroundImageView = UIImageView(image: UIImage(named: "Background"))
+    let backgroundImageView = UIImageView(image: UIImage(named: "Back_Lines"))
     
     weak var delegate: NewOrderDelegate?
     var orderNumber: Int?
@@ -316,7 +316,7 @@ class NewOrderViewController: UIViewController {
             
             saveButton.topAnchor.constraint(equalTo: descriptionTextView.bottomAnchor, constant: 20),
             saveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            saveButton.widthAnchor.constraint(equalToConstant: 180),
+            saveButton.widthAnchor.constraint(equalToConstant: 400),
             saveButton.heightAnchor.constraint(equalToConstant: 30),
             
             

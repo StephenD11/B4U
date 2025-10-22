@@ -16,17 +16,17 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" insetsLayoutMarginsFromSafeArea="NO" image="Background_anim" translatesAutoresizingMaskIntoConstraints="NO" id="Iej-G7-sLd">
-                                <rect key="frame" x="0.0" y="118" width="396" height="666"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Back ground LS" translatesAutoresizingMaskIntoConstraints="NO" id="3Kx-ja-9VP">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="Iej-G7-sLd" secondAttribute="trailing" id="F92-Vw-w6k"/>
-                            <constraint firstItem="Iej-G7-sLd" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="V2f-wQ-S1e"/>
-                            <constraint firstAttribute="bottom" secondItem="Iej-G7-sLd" secondAttribute="bottom" id="aSV-aG-6Qk"/>
-                            <constraint firstItem="Iej-G7-sLd" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="yM7-3b-1K7"/>
+                            <constraint firstItem="3Kx-ja-9VP" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="503-GE-kPO"/>
+                            <constraint firstAttribute="bottom" secondItem="3Kx-ja-9VP" secondAttribute="bottom" id="RWQ-8V-6Xm"/>
+                            <constraint firstItem="3Kx-ja-9VP" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="Xle-zz-wud"/>
+                            <constraint firstAttribute="trailing" secondItem="3Kx-ja-9VP" secondAttribute="trailing" id="gm6-Xg-xFW"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -36,7 +36,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="Background_anim" width="1242" height="2688"/>
+        <image name="Back ground LS" width="1242" height="2688"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

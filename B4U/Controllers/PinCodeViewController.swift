@@ -6,13 +6,9 @@
 //
 
 import UIKit
-import RiveRuntime
+import Lottie
 
 class PinCodeViewController: UIViewController {
-        
-    lazy var backgroundAnimation: RiveViewModel = {
-        return RiveViewModel(fileName: "pin_background_animation")
-    }()
     
     lazy var pinLabelFieldText: UILabel = {
         let lb = UILabel()
@@ -65,11 +61,39 @@ class PinCodeViewController: UIViewController {
         btn.addTarget(self, action: #selector(enterTapped), for: .touchUpInside)
         return btn
     }()
+    
+    
+    override func loadView() {
+        super.loadView()
+        
+        view.backgroundColor = .clear
 
+        let animationView = LottieAnimationView(name: "Background Pin Anim")
+        animationView.translatesAutoresizingMaskIntoConstraints = false
+        animationView.contentMode = .scaleAspectFill
+        animationView.loopMode = .loop
+        animationView.backgroundBehavior = .continuePlaying
+        animationView.play()
+        view.addSubview(animationView)
+        view.sendSubviewToBack(animationView)
+        NSLayoutConstraint.activate([
+            animationView.topAnchor.constraint(equalTo: view.topAnchor),
+            animationView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            animationView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            animationView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .systemBackground
+        if let nav = self.navigationController {
+            nav.navigationBar.setBackgroundImage(UIImage(), for: .default)
+            nav.navigationBar.shadowImage = UIImage()
+            nav.navigationBar.isTranslucent = true
+            nav.view.backgroundColor = .clear
+        }
+        
         setupUI()
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
@@ -81,17 +105,7 @@ class PinCodeViewController: UIViewController {
         enterButton.addTarget(self, action: #selector(buttonTouchDown), for: .touchDown)
         enterButton.addTarget(self, action: #selector(buttonTouchUp), for: [.touchUpInside, .touchDragExit])
         
-        let riveView = backgroundAnimation.createRiveView()
-        riveView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(riveView)
-        view.sendSubviewToBack(riveView)
         
-        NSLayoutConstraint.activate([
-            riveView.topAnchor.constraint(equalTo: view.topAnchor),
-            riveView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            riveView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            riveView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
     }
     
     @objc func buttonTouchDown() {
@@ -123,10 +137,9 @@ class PinCodeViewController: UIViewController {
             pinTextField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             pinTextField.widthAnchor.constraint(equalToConstant: 150),
             pinTextField.heightAnchor.constraint(equalToConstant: 45),
-            
 
 
-            enterButton.topAnchor.constraint(equalTo: pinTextField.bottomAnchor, constant: 15),
+            enterButton.topAnchor.constraint(equalTo: pinTextField.bottomAnchor, constant: 13),
             enterButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             enterButton.widthAnchor.constraint(equalToConstant: 180),
             enterButton.heightAnchor.constraint(equalToConstant: 35),
@@ -193,14 +206,14 @@ class PinCodeViewController: UIViewController {
                 return
             }
             
-            let pinAlert = UIAlertController(title: "Success ✅ ", message: "Your PIN: \(user.pin)", preferredStyle: .alert)
+            let pinAlert = UIAlertController(title: "Success", message: "Your PIN: \(user.pin)", preferredStyle: .alert)
             pinAlert.addAction(UIAlertAction(title: "Great", style: .default))
             self?.present(pinAlert, animated: true)
         }))
         
         alert.addAction(UIAlertAction(title: "Delete account", style: .destructive, handler: { _ in
             
-            let mainAlert = UIAlertController(title: "🚨 WARNING 🚨 ", message: "All data will be deleted. Are you sure you want to delete your account? ", preferredStyle: .alert)
+            let mainAlert = UIAlertController(title: "❗️ WARNING ❗️", message: "All data will be deleted. Are you sure you want to delete your account? ", preferredStyle: .alert)
             
             mainAlert.addAction(UIAlertAction(title: "No", style: .default))
             self.present(mainAlert, animated:true)
@@ -229,3 +242,4 @@ class PinCodeViewController: UIViewController {
     
     
 }
+    

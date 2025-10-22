@@ -149,7 +149,7 @@ class AuthView: UIView {
 
             enterButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             enterButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -60),
-            enterButton.heightAnchor.constraint(equalToConstant: 40)
+            enterButton.heightAnchor.constraint(equalToConstant: 39.5)
         ])
         
         stackViewBottomConstraint = stackView.bottomAnchor.constraint(equalTo: enterButton.topAnchor, constant: -50)

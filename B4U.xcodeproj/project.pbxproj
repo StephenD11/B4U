@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		FD02BA202EA0D52700658107 /* RiveRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = FD02BA1F2EA0D52700658107 /* RiveRuntime */; };
 		FD7208F22E9945BA0036786E /* Hero in Frameworks */ = {isa = PBXBuildFile; productRef = FD7208F12E9945BA0036786E /* Hero */; };
-		FD95554C2E8881690027C75D /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = FD95554B2E8881690027C75D /* Lottie */; };
+		FDC9E7932EA8AE5C00531443 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = FDC9E7922EA8AE5C00531443 /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,8 +43,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				FD7208F22E9945BA0036786E /* Hero in Frameworks */,
-				FD95554C2E8881690027C75D /* Lottie in Frameworks */,
 				FD02BA202EA0D52700658107 /* RiveRuntime in Frameworks */,
+				FDC9E7932EA8AE5C00531443 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,9 +87,9 @@
 			);
 			name = B4U;
 			packageProductDependencies = (
-				FD95554B2E8881690027C75D /* Lottie */,
 				FD7208F12E9945BA0036786E /* Hero */,
 				FD02BA1F2EA0D52700658107 /* RiveRuntime */,
+				FDC9E7922EA8AE5C00531443 /* Lottie */,
 			);
 			productName = BusFoYo;
 			productReference = FD9555302E8880B00027C75D /* B4U.app */;
@@ -120,9 +120,9 @@
 			mainGroup = FD9555272E8880B00027C75D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				FD95554A2E8881690027C75D /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				FD7208F02E9945BA0036786E /* XCRemoteSwiftPackageReference "Hero" */,
 				FD02BA1E2EA0D52700658107 /* XCRemoteSwiftPackageReference "rive-ios" */,
+				FDC9E7912EA8AE5C00531443 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FD9555312E8880B00027C75D /* Products */;
@@ -370,7 +370,7 @@
 				minimumVersion = 1.6.4;
 			};
 		};
-		FD95554A2E8881690027C75D /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
+		FDC9E7912EA8AE5C00531443 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/airbnb/lottie-ios";
 			requirement = {
@@ -391,9 +391,9 @@
 			package = FD7208F02E9945BA0036786E /* XCRemoteSwiftPackageReference "Hero" */;
 			productName = Hero;
 		};
-		FD95554B2E8881690027C75D /* Lottie */ = {
+		FDC9E7922EA8AE5C00531443 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = FD95554A2E8881690027C75D /* XCRemoteSwiftPackageReference "lottie-ios" */;
+			package = FDC9E7912EA8AE5C00531443 /* XCRemoteSwiftPackageReference "lottie-ios" */;
 			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */

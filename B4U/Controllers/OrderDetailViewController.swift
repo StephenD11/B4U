@@ -11,7 +11,8 @@ class OrderDetailViewController: UIViewController {
     
     weak var delegate: NewOrderDelegate?
     weak var incomeDelegate: NewOrderIncomeDelegate?
-    let backgroundImageView = UIImageView(image: UIImage(named: "Background"))
+    
+    let backgroundImageView = UIImageView(image: UIImage(named: "Back_Lines"))
     
     var order: Order
     var monthName: String!
@@ -151,17 +152,15 @@ class OrderDetailViewController: UIViewController {
     }()
     
     lazy var deleteButton: UIButton = {
-        let btn = UIButton()
+        let btn = UIButton(type: .system)
         btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.setTitle("", for: .normal)
+        btn.setTitle("Delete order", for: .normal)
         btn.setTitleColor(.systemRed, for: .normal)
-        btn.setImage(UIImage(named: "Button Delete order light"), for: .normal)
-        btn.setImage(UIImage(named: "Button Delete order dark"), for: .highlighted)
-        btn.imageView?.contentMode = .scaleAspectFit
         btn.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         btn.addTarget(self, action: #selector(deleteTapped), for: .touchUpInside)
         return btn
     }()
+    
     
     lazy var clientNameLabel: UILabel = makeLabel(withText: "Client name:")
     lazy var orderTotalPriceLabel: UILabel = makeLabel(withText: "Total price:")
@@ -351,15 +350,15 @@ class OrderDetailViewController: UIViewController {
 
             
             saveButton.topAnchor.constraint(equalTo: descriptionTextView.bottomAnchor, constant: 25),
-            saveButton.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 40),
-            saveButton.widthAnchor.constraint(equalToConstant: 180),
-            saveButton.heightAnchor.constraint(equalToConstant: 35),
+            saveButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            saveButton.widthAnchor.constraint(equalToConstant: 400),
+            saveButton.heightAnchor.constraint(equalToConstant: 30),
 
-            deleteButton.topAnchor.constraint(equalTo: saveButton.topAnchor),
-            deleteButton.leadingAnchor.constraint(equalTo: saveButton.trailingAnchor, constant: 30),
-            deleteButton.widthAnchor.constraint(equalTo: saveButton.widthAnchor),
-            deleteButton.heightAnchor.constraint(equalTo: saveButton.heightAnchor),
-            deleteButton.trailingAnchor.constraint(lessThanOrEqualTo: contentView.trailingAnchor, constant: -40),
+            deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -25),
+            deleteButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            deleteButton.widthAnchor.constraint(equalToConstant: 200),
+            deleteButton.heightAnchor.constraint(equalToConstant: 40),
+            
         ])
         
         contentView.bottomAnchor.constraint(equalTo: saveButton.bottomAnchor, constant: 30).isActive = true

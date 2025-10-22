@@ -5,18 +5,19 @@
 //  Created by Stepan on 28.09.2025.
 //
 import UIKit
-import RiveRuntime
+import Lottie
 
 class MainViewController: UIViewController {
     
     var calculationsVC: CalculationsViewController = CalculationsViewController()
+    let backgroundImageView = UIImageView(image: UIImage(named: "Back_Lines"))
 
     lazy var userNameTop: UILabel = {
         let lb = UILabel()
-        lb.text = "Welcome: \(UserManager.shared.currentUser?.username ?? "")"
+        lb.text = "Hi: \(UserManager.shared.currentUser?.username ?? "") 👋 "
         lb.translatesAutoresizingMaskIntoConstraints = false
-        lb.font = UIFont.systemFont(ofSize: 20, weight: .medium)
-        lb.textColor = .darkGray
+        lb.font = UIFont.systemFont(ofSize: 27, weight: .bold)
+        lb.textColor = .black
         lb.textAlignment = .left
         return lb
     }()
@@ -27,7 +28,7 @@ class MainViewController: UIViewController {
        let lab = UILabel()
         lab.text = "Your company name: \(UserManager.shared.currentUser?.company ?? "")"
         lab.textColor = .lightGray
-        lab.font = UIFont.systemFont(ofSize: 13, weight: .regular)
+        lab.font = UIFont.systemFont(ofSize: 12, weight: .regular)
         lab.textAlignment = .left
         lab.translatesAutoresizingMaskIntoConstraints = false
         return lab
@@ -42,13 +43,14 @@ class MainViewController: UIViewController {
         return stack
     }()
     
-
-    
-    lazy var centerImageView: UIImageView = {
-        let iv = UIImageView(image: UIImage(named: "default_main"))
-        iv.contentMode = .scaleAspectFit
-        iv.translatesAutoresizingMaskIntoConstraints = false
-        return iv
+    lazy var centerImageView: LottieAnimationView = {
+        let animationView = LottieAnimationView(name: "Main_Base")
+        animationView.translatesAutoresizingMaskIntoConstraints = false
+        animationView.contentMode = .scaleAspectFill
+        animationView.loopMode = .loop
+        animationView.backgroundBehavior = .pauseAndRestore
+        animationView.play()
+        return animationView
     }()
     
     func createBottomButton(title: String) -> UIButton {
@@ -129,8 +131,8 @@ class MainViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        userNameTop.text = "Welcome: \(UserManager.shared.currentUser?.username ?? "")"
-        mainLabel.text = "Your company name: \(UserManager.shared.currentUser?.company ?? "")"
+        userNameTop.text = "Hi, \(UserManager.shared.currentUser?.username ?? "") 👋 "
+        mainLabel.text = "Company: \(UserManager.shared.currentUser?.company ?? "")"
         
 
     }
@@ -139,9 +141,10 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = UIColor.white
+        
+
+        
         setupUI()
-        
-        
         
         let swipeLeft = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe(_:)))
         swipeLeft.direction = .left
@@ -153,35 +156,50 @@ class MainViewController: UIViewController {
 
         centerImageView.isUserInteractionEnabled = true
         
+        backgroundImageView.contentMode = .scaleAspectFill
+        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(backgroundImageView)
+        view.sendSubviewToBack(backgroundImageView)
+        
+        NSLayoutConstraint.activate([
+            backgroundImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            backgroundImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+        
     }
     
     func setupUI() {
         
         view.addSubview(userNameTop)
         view.addSubview(mainLabel)
-        view.addSubview(centerImageView)
         view.addSubview(profileNextButton)
         view.addSubview(bottomStack)
+        view.addSubview(centerImageView)
+        view.sendSubviewToBack(centerImageView)
+
         
         NSLayoutConstraint.activate ([
             
             userNameTop.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             userNameTop.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 40),
             
-            mainLabel.topAnchor.constraint(equalTo: userNameTop.bottomAnchor),
+            mainLabel.topAnchor.constraint(equalTo: userNameTop.bottomAnchor, constant: 5),
             mainLabel.leadingAnchor.constraint(equalTo: userNameTop.leadingAnchor),
-
-            centerImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            centerImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
-            centerImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.7),
-            centerImageView.heightAnchor.constraint(equalTo: centerImageView.widthAnchor),
-        
-
                     
             bottomStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             bottomStack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -25),
             bottomStack.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9),
-            bottomStack.heightAnchor.constraint(equalToConstant: 50)
+            bottomStack.heightAnchor.constraint(equalToConstant: 50),
+            
+
+            centerImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            centerImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            centerImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            centerImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+
+        
             
         ])
     }
@@ -229,19 +247,36 @@ class MainViewController: UIViewController {
         self.selectedButton = button
 
         let oldImageView = self.centerImageView
-
         let oldButton = view.viewWithTag(999)
 
-        let newImageView = UIImageView(image: UIImage(named: imageName))
-        newImageView.contentMode = .scaleAspectFit
-        newImageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(newImageView)
+        // Создаём новый LottieAnimationView вместо UIImageView
+        let animationName: String
+        switch imageName {
+        case "profileImage":
+            animationName = "Talent Search"
+        case "ordersImage":
+            animationName = "Package Box Animation"
+        case "calculationsImage":
+            animationName = "Cash or Card"
+        default:
+            animationName = "Main_Base"
+        }
+        let newAnimationView = LottieAnimationView(name: animationName)
+        newAnimationView.translatesAutoresizingMaskIntoConstraints = false
+        newAnimationView.contentMode = .scaleAspectFit
+        newAnimationView.loopMode = .loop
+        newAnimationView.backgroundBehavior = .continuePlaying
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            newAnimationView.play()
+        }
+        view.addSubview(newAnimationView)
 
         NSLayoutConstraint.activate([
-            newImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            newImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
-            newImageView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
-            newImageView.heightAnchor.constraint(equalTo: newImageView.widthAnchor),
+            newAnimationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            newAnimationView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -50),
+            newAnimationView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.9),
+            newAnimationView.heightAnchor.constraint(equalTo: newAnimationView.widthAnchor),
         ])
 
         let buttonTitle: String
@@ -255,8 +290,7 @@ class MainViewController: UIViewController {
         default:
             buttonTitle = "ACTION"
         }
-        
-        
+
         let imageActionButton = UIButton(type: .custom)
         imageActionButton.tag = 999
         imageActionButton.setTitle(buttonTitle, for: .normal)
@@ -284,15 +318,15 @@ class MainViewController: UIViewController {
 
         view.addSubview(imageActionButton)
         NSLayoutConstraint.activate([
-            imageActionButton.topAnchor.constraint(equalTo: newImageView.bottomAnchor, constant: 20),
+            imageActionButton.topAnchor.constraint(equalTo: newAnimationView.bottomAnchor, constant: -20),
             imageActionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             imageActionButton.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.3),
-            imageActionButton.heightAnchor.constraint(equalToConstant: 32)
+            imageActionButton.heightAnchor.constraint(equalToConstant: 30)
         ])
 
         let translationX = swipeDirection == .left ? view.frame.width : -view.frame.width
 
-        newImageView.transform = CGAffineTransform(translationX: translationX, y: 0)
+        newAnimationView.transform = CGAffineTransform(translationX: translationX, y: 0)
         imageActionButton.transform = CGAffineTransform(translationX: translationX, y: 0)
 
         view.layoutIfNeeded()
@@ -300,12 +334,12 @@ class MainViewController: UIViewController {
         UIView.animate(withDuration: 0.4, animations: {
             oldImageView.transform = CGAffineTransform(translationX: -translationX, y: 0)
             oldButton?.transform = CGAffineTransform(translationX: -translationX, y: 0)
-            newImageView.transform = .identity
+            newAnimationView.transform = .identity
             imageActionButton.transform = .identity
         }, completion: { _ in
             oldImageView.removeFromSuperview()
             oldButton?.removeFromSuperview()
-            self.centerImageView = newImageView
+            self.centerImageView = newAnimationView
             self.isAnimating = false
         })
 
@@ -317,7 +351,6 @@ class MainViewController: UIViewController {
             }
             button.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
         }
-        
     }
     
     @objc func buttonTouchDown() {

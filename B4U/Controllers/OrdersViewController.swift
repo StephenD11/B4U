@@ -10,7 +10,7 @@ import UIKit
 
 class OrdersViewController: UIViewController, NewOrderDelegate{
     
-    let backgroundImageView = UIImageView(image: UIImage(named: "Background2"))
+    let backgroundImageView = UIImageView(image: UIImage(named: "Back_Lines"))
 
     
     var ordersByMonth: [String: [Order]] = [:]

@@ -14,7 +14,7 @@ class SplashViewController: UIViewController {
 
     
     lazy var animationView: LottieAnimationView = {
-        let animView = LottieAnimationView(name: "splash_anim")
+        let animView = LottieAnimationView(name: "Enter anim")
         animView.translatesAutoresizingMaskIntoConstraints = false
         animView.contentMode = .scaleAspectFit
         animView.loopMode = .playOnce
@@ -23,7 +23,6 @@ class SplashViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
         setupAnimationUI()
         playAnimation()
         
@@ -47,11 +46,12 @@ class SplashViewController: UIViewController {
     func setupAnimationUI() {
         view.addSubview(animationView)
         NSLayoutConstraint.activate([
-            animationView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            animationView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            animationView.widthAnchor.constraint(equalToConstant: 200),
-            animationView.heightAnchor.constraint(equalToConstant: 200)
+            animationView.topAnchor.constraint(equalTo: view.topAnchor),
+            animationView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            animationView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            animationView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
+        animationView.contentMode = .scaleAspectFill
     }
 
     func playAnimation() {
