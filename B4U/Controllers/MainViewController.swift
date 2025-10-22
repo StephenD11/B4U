@@ -318,7 +318,7 @@ class MainViewController: UIViewController {
 
         view.addSubview(imageActionButton)
         NSLayoutConstraint.activate([
-            imageActionButton.topAnchor.constraint(equalTo: newAnimationView.bottomAnchor, constant: -20),
+            imageActionButton.topAnchor.constraint(equalTo: newAnimationView.bottomAnchor, constant: -10),
             imageActionButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             imageActionButton.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.3),
             imageActionButton.heightAnchor.constraint(equalToConstant: 30)

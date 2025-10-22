@@ -77,6 +77,8 @@ class CalculationsViewController: UIViewController, NewOrderIncomeDelegate {
         view.backgroundColor = .systemBackground
         title = "Calculations"
         
+        print("🧩 Текущий пользователь:", UserManager.shared.currentUser?.username ?? "нет")
+        
         backgroundImageView.contentMode = .scaleAspectFill
         backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(backgroundImageView)

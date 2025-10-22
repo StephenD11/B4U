@@ -312,6 +312,22 @@ class ProfileViewController: UIViewController, UITextFieldDelegate {
             } else {
                 print("⚠️ No data found for \(oldKey)")
             }
+
+            let oldExpensesKey = "savedExpenses_\(oldUsername)"
+            let newExpensesKey = "savedExpenses_\(username)"
+            if let oldExpensesData = UserDefaults.standard.data(forKey: oldExpensesKey) {
+                UserDefaults.standard.set(oldExpensesData, forKey: newExpensesKey)
+                UserDefaults.standard.removeObject(forKey: oldExpensesKey)
+                print("✅ Expenses moved from \(oldExpensesKey) → \(newExpensesKey)")
+            }
+
+            let oldIncomesKey = "savedIncomes_\(oldUsername)"
+            let newIncomesKey = "savedIncomes_\(username)"
+            if let oldIncomesData = UserDefaults.standard.data(forKey: oldIncomesKey) {
+                UserDefaults.standard.set(oldIncomesData, forKey: newIncomesKey)
+                UserDefaults.standard.removeObject(forKey: oldIncomesKey)
+                print("✅ Incomes moved from \(oldIncomesKey) → \(newIncomesKey)")
+            }
         }
         
         let alert = UIAlertController(title: "Profile updated", message: "", preferredStyle: .alert)
